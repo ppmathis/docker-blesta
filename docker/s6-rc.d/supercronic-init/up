@@ -1,0 +1,8 @@
+#!/usr/bin/execlineb -P
+with-contenv
+if {
+  pipeline { cat /etc/supercronic }
+  redirfd -w 1 /run/supercronic
+  envsubst "$BLESTA_CRON_SCHEDULE"
+}
+chmod 444 /run/supercronic

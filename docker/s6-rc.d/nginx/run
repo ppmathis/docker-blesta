@@ -1,0 +1,2 @@
+#!/usr/bin/execlineb -P
+nginx -e "stderr" -c "/run/nginx.conf" -g "daemon off;"

@@ -1,0 +1,12 @@
+data_dir = "/var/tmp/vector"
+
+[sources.log_files]
+type = "file"
+read_from = "end"
+ignore_older_secs = 86400
+include = ["/opt/blesta/data/logs/*.log"]
+
+[sinks.console]
+type = "console"
+inputs = ["log_files"]
+encoding.codec = "text"

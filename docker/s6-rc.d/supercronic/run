@@ -1,0 +1,2 @@
+#!/usr/bin/execlineb -P
+supercronic -no-reap /run/supercronic

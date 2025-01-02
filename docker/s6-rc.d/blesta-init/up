@@ -1,0 +1,2 @@
+#!/usr/bin/execlineb -P
+elglob FILE /opt/blesta/public/config-default/*.php cp ${FILE} /opt/blesta/data/config/

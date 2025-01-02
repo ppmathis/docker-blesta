@@ -1,0 +1,29 @@
+#!/usr/bin/execlineb -P
+with-contenv
+
+# Ensure required environment variables are set
+ifelse -n { eltest -v BLESTA_ADDRESS } { s6-fatal "BLESTA_ADDRESS is not set" }
+ifelse -n { eltest -v BLESTA_HOST } { s6-fatal "BLESTA_HOST is not set" }
+
+# Create missing state directories
+if { mkdir -p
+  /opt/blesta/data/cache
+  /opt/blesta/data/config
+  /opt/blesta/data/logs
+  /opt/blesta/data/uploads
+  /var/tmp/blesta
+  /var/tmp/nginx
+  /var/tmp/nginx/client-body
+  /var/tmp/nginx/fastcgi
+  /var/tmp/nginx/proxy
+  /var/tmp/nginx/scgi
+  /var/tmp/nginx/uwsgi
+  /var/tmp/php
+  /var/tmp/php/misc
+  /var/tmp/php/sessions
+  /var/tmp/php/uploads
+  /var/tmp/php/wsdl
+  /var/tmp/vector
+}
+
+exit 0

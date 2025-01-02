@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  push:
+    branches:
+      - main
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    outputs:
+      targets: ${{ steps.generate.outputs.targets }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: List Bake targets
+        id: generate
+        uses: docker/bake-action/subaction/list-targets@v4
+        with:
+          files: docker-bake.hcl
+
+  build:
+    runs-on: ubuntu-24.04
+    needs:
+      - prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJson(needs.prepare.outputs.targets) }}
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
+      packages: write
+    env:
+      SOURCE_DATE_EPOCH: 0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Setup Docker
+        uses: docker/setup-docker-action@v4
+        with:
+          daemon-config: |
+            {
+              "debug": true,
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version: lts/*
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Install Playwright dependencies
+        run: npx playwright install --with-deps
+
+      - name: Build image
+        uses: docker/bake-action@v5
+        with:
+          files: docker-bake.hcl
+          push: true
+        env:
+          IMAGE_NAMES: localhost:5000/blesta:${{ github.sha }}
+          DOCKER_BUILD_SUMMARY: "false"
+
+      - name: Test image for AMD64
+        run: npx playwright test
+        env:
+          BLESTA_PLATFORM: linux/amd64
+          BLESTA_IMAGE: localhost:5000/blesta:${{ github.sha }}
+          BLESTA_LICENSE_KEY: ${{ secrets.BLESTA_LICENSE_KEY }}
+
+      - name: Test image for ARM64
+        run: npx playwright test
+        env:
+          BLESTA_PLATFORM: linux/arm64
+          BLESTA_IMAGE: localhost:5000/blesta:${{ github.sha }}
+          BLESTA_LICENSE_KEY: ${{ secrets.BLESTA_LICENSE_KEY }}
+
+      - name: Push image
+        uses: docker/bake-action@v5
+        with:
+          files: docker-bake.hcl
+          push: true
+        env:
+          IMAGE_NAMES: >-
+            ghcr.io/ppmathis/blesta:<version>,
+            docker.io/ppmathis/blesta:<version>
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          repository: ppmathis/blesta
+          enable-url-completion: true

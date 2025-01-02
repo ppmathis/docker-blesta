@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
+name: blesta
+
+services:
+  blesta:
+    image: ${BLESTA_IMAGE:-ppmathis/blesta:latest}
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      BLESTA_ADDRESS: ${BLESTA_ADDRESS:?Missing BLESTA_ADDRESS}
+      BLESTA_HOST: ${BLESTA_HOST:?Missing BLESTA_HOST}
+    networks:
+      public: {}
+      internal: {}
+    ports:
+      - ${BLESTA_HTTP_PORT:-8080}:8080/tcp
+    volumes:
+      - blesta-data:/opt/blesta/data
+    tmpfs:
+      - /run:uid=65532,gid=65532,mode=0755,exec,nodev,nosuid
+      - /tmp:uid=65532,gid=65532,mode=2777,noexec,nodev,nosuid
+    depends_on:
+      - mariadb
+
+  mariadb:
+    image: bitnami/mariadb:11.5
+    cap_drop:
+      - ALL
+    environment:
+      MARIADB_DATABASE: blesta
+      MARIADB_USER: blesta
+      MARIADB_PASSWORD: ${MARIADB_BLESTA_PASSWORD:?Missing MARIADB_BLESTA_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Missing MARIADB_ROOT_PASSWORD}
+    networks:
+      internal: {}
+    volumes:
+      - mariadb-data:/bitnami/mariadb
+    configs:
+      - source: mariadb-config
+        target: /opt/bitnami/mariadb/conf/my_custom.cnf
+
+volumes:
+  blesta-data: {}
+  mariadb-data: {}
+
+configs:
+  mariadb-config:
+    content: |
+      [mysqld]
+      max_allowed_packet=128M
+      wait_timeout=3600
+
+networks:
+  public:
+    enable_ipv6: true
+  internal:
+    internal: true
+    enable_ipv6: true

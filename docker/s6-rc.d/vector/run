@@ -1,0 +1,2 @@
+#!/usr/bin/execlineb -P
+vector --quiet --config /etc/vector.toml

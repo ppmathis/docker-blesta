@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
+name: blesta-test
+
+services:
+  blesta:
+    image: ${BLESTA_IMAGE:-localhost/blesta:latest}
+    platform: ${BLESTA_PLATFORM:-}
+    develop:
+      watch:
+        - path: Dockerfile
+          action: rebuild
+        - path: docker/
+          action: rebuild
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      BLESTA_ADDRESS: 127.0.0.1
+      BLESTA_CRON_SCHEDULE: '#'
+      BLESTA_HOST: localhost
+    ports:
+      - 4200:8080/tcp
+    tmpfs:
+      - /run:uid=65532,gid=65532,mode=0755,exec,nodev,nosuid
+      - /tmp:uid=65532,gid=65532,mode=2777,noexec,nodev,nosuid
+    depends_on:
+      - mariadb
+      - mailpit
+
+  mariadb:
+    image: bitnami/mariadb:11.5
+    cap_drop:
+      - ALL
+    environment:
+      MARIADB_DATABASE: blesta
+      MARIADB_USER: blesta
+      MARIADB_PASSWORD: blesta
+      MARIADB_ROOT_PASSWORD: root
+    ports:
+      - 4201:3306/tcp
+    tmpfs:
+      - /bitnami/mariadb
+    configs:
+      - source: mariadb-config
+        target: /opt/bitnami/mariadb/conf/my_custom.cnf
+
+  mailpit:
+    image: axllent/mailpit:latest
+    environment:
+      MP_POP3_AUTH: blesta:blesta
+    networks:
+      default:
+        aliases:
+          - mailpit
+          - mailpit.local
+    ports:
+      - 4202:8025/tcp
+      - 4303:8080/tcp
+
+configs:
+  mariadb-config:
+    content: |
+      [mysqld]
+      max_allowed_packet=128M
+      wait_timeout=3600

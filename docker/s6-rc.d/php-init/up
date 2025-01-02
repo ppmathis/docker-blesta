@@ -1,0 +1,8 @@
+#!/usr/bin/execlineb -P
+with-contenv
+if {
+  pipeline { cat /etc/php/conf.d/99-custom.ini.tpl }
+  redirfd -w 1 /run/php.ini
+  envsubst "$BLESTA_MEMORY_LIMIT $BLESTA_UPLOAD_LIMIT"
+}
+chmod 444 /run/php.ini

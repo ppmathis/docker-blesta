@@ -1,0 +1,8 @@
+#!/usr/bin/execlineb -P
+with-contenv
+if {
+  pipeline { cat /etc/nginx/nginx.conf.tpl }
+  redirfd -w 1 /run/nginx.conf
+  envsubst "$BLESTA_ADDRESS $BLESTA_HOST $BLESTA_UPLOAD_LIMIT"
+}
+chmod 444 /run/nginx.conf
