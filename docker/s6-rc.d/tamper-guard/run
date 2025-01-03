@@ -1,0 +1,6 @@
+#!/usr/bin/execlineb -P
+pipeline { inotifywait -m -e CREATE -e MODIFY -e DELETE --format '%w%f' /run }
+forstdin -ECn EVENT
+ifelse { eltest ${EVENT} =~ /run/(nginx\\.conf|php\\.ini|supercronic) }
+{ s6-fatal "tamper-guard: killing container due to forbidden change: ${EVENT}" }
+echo "tamper-guard: ignored change: ${EVENT}"

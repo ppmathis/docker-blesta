@@ -26,6 +26,7 @@ This is an unofficial Docker image for [Blesta](https://blesta.com/), the profes
 With security in mind, this image is built with the following features:
 
 - Automatic minutely cron job scheduling for Blesta
+- Basic tamper guard to kill the container if config files are edited during runtime
 - Best practice configuration for Nginx and PHP-FPM
 - Built with minimal set of packages, to reduce the attack surface
 - Daily builds with latest packages to ensure security updates

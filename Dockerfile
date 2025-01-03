@@ -84,6 +84,7 @@ RUN true \
   # Install system dependencies
   && apk add --no-cache \
   envsubst \
+  inotify-tools \
   nginx \
   "php${PHP_VERSION}" \
   "php${PHP_VERSION}-curl" \
