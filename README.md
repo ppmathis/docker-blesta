@@ -141,3 +141,9 @@ This image is built with security in mind, but there are some additional steps y
 ### How can I ensure that Blesta can send emails?
 
 This container is not designed to handle `sendmail` or any other mail transport agent. Instead, you should configure Blesta to use an external SMTP server for sending emails. You can do this by navigating to `Settings -> Company -> Emails -> Mail Settings` and configuring your SMTP server there.
+
+## Final Remarks
+
+- The container will automatically exit if either `nginx`, `php-fpm`, or the built-in `anti-tamper` process dies. This ensures the container does not run in an inconsistent state. Other services, such as `supercronic` and `vector`, are not considered critical and will not cause the container to exit if they fail. Instead, they will be automatically restarted, which is also visible in the container logs.
+
+- A rudimentary anti-tamper script is included to prevent the dynamic configuration files inside `/run` from being modified. While these files can't be baked into the image due to the need for some dynamic configuration, this ensures that if an attacker exploits Blesta and tries to change files like `php.ini`, the container will automatically exit.
