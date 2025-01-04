@@ -142,6 +142,33 @@ This image is built with security in mind, but there are some additional steps y
 
 This container is not designed to handle `sendmail` or any other mail transport agent. Instead, you should configure Blesta to use an external SMTP server for sending emails. You can do this by navigating to `Settings -> Company -> Emails -> Mail Settings` and configuring your SMTP server there.
 
+### How can I use my own Blesta extensions like modules or plugins?
+
+You have two strategies to use your own Blesta extensions with this container image. The easiest solution is to mount your extensions directly into the container using bind mounts. You can do this by adding the following lines to your Docker Compose file:
+
+```yaml
+services:
+  blesta:
+    # ... other configuration ...
+    volumes:
+      - blesta-data:/opt/blesta/data # already present, persists Blesta data
+      - ./my-module:/opt/blesta/public/components/modules/my-module:ro # mount your module
+      - ./my-plugin:/opt/blesta/public/plugins/my-plugin:ro # mount your plugin
+      # ... add more extensions here ...
+```
+
+Please note that you should mount the directories read-only (`:ro`) to ensure the container can't modify your extensions. The second solution is to create your own Docker image based on this image and add your extensions during the build process. You can do this by creating a `Dockerfile` like this:
+
+```dockerfile
+FROM ppmathis/blesta:latest # you probably want to pin a specific version here
+
+COPY --chown=0:0 my-module /opt/blesta/public/components/modules/my-module
+COPY --chown=0:0 my-plugin /opt/blesta/public/plugins/my-plugin
+# ... add more extensions here ...
+```
+
+While the first solution is easier to set up and maintain, the second solution is more flexible and allows you to version your extensions along with your Docker image. Choose the solution that fits your needs best.
+
 ## Final Remarks
 
 - The container will automatically exit if either `nginx`, `php-fpm`, or the built-in `anti-tamper` process dies. This ensures the container does not run in an inconsistent state. Other services, such as `supercronic` and `vector`, are not considered critical and will not cause the container to exit if they fail. Instead, they will be automatically restarted, which is also visible in the container logs.
