@@ -11,6 +11,11 @@ if { mkdir -p
   /opt/blesta/data/config
   /opt/blesta/data/logs
   /opt/blesta/data/uploads
+}
+
+# Re-create temporary directories
+if { find /var/tmp -mindepth 1 -maxdepth 1 -delete }
+if { mkdir -p
   /var/tmp/blesta
   /var/tmp/nginx
   /var/tmp/nginx/client-body

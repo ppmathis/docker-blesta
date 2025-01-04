@@ -128,28 +128,17 @@ USER 0:0
 RUN true \
   && install -d -o 0 -g 0 -m 0755 \
   /opt/blesta \
+  /opt/blesta/defaults \
+  /opt/blesta/defaults/config \
   /opt/ioncube \
-  && install -d -o 65532 -g 65532 -m 0750 \
-  /var/tmp/blesta \
-  /var/tmp/nginx \
-  /var/tmp/nginx/client-body \
-  /var/tmp/nginx/fastcgi \
-  /var/tmp/nginx/proxy \
-  /var/tmp/nginx/scgi \
-  /var/tmp/nginx/uwsgi \
-  /var/tmp/php \
-  /var/tmp/php/misc \
-  /var/tmp/php/sessions \
-  /var/tmp/php/uploads \
-  /var/tmp/php/wsdl \
-  /var/tmp/vector \
-  && mv /opt/blesta/public/config /opt/blesta/public/config-default \
+  && install -o 0 -g 0 -m 0644 -t /opt/blesta/defaults/config /opt/blesta/public/config/*.php \
   && install -d -o 65532 -g 65532 -m 0750 \
   /opt/blesta/data \
   /opt/blesta/data/cache \
   /opt/blesta/data/config \
   /opt/blesta/data/logs \
   /opt/blesta/data/uploads \
+  /var/tmp \
   && rm -rf /opt/blesta/public/cache /opt/blesta/public/config \
   && ln -sf /opt/blesta/data/cache /opt/blesta/public/cache \
   && ln -sf /opt/blesta/data/config /opt/blesta/public/config \
