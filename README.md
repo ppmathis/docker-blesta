@@ -160,7 +160,8 @@ services:
 Please note that you should mount the directories read-only (`:ro`) to ensure the container can't modify your extensions. The second solution is to create your own Docker image based on this image and add your extensions during the build process. You can do this by creating a `Dockerfile` like this:
 
 ```dockerfile
-FROM ppmathis/blesta:latest # you probably want to pin a specific version here
+# you probably want to pin a specific version instead of using `latest`
+FROM ppmathis/blesta:latest
 
 COPY --chown=0:0 my-module /opt/blesta/public/components/modules/my-module
 COPY --chown=0:0 my-plugin /opt/blesta/public/plugins/my-plugin
