@@ -1,9 +1,9 @@
 import { Page, test, expect } from '@playwright/test';
-import { expectAdminMessage, handleModalPrompt, loginAdmin, runManualCron } from '../helper.blesta';
+import { deleteAdminTableItems, expectAdminMessage, loginAdmin, runManualCron } from '../helper.blesta';
 import { deleteAllMails, sendFakeMail } from '../helper.mailpit';
 
 test.describe('Support > Departments', () => {
-  test.afterAll('cleanup', async ({ browser }) => {
+  test.beforeAll('cleanup', async ({ browser }) => {
     const page = await browser.newPage();
     await loginAdmin(page);
     await removeAllDepartments(page);
@@ -109,25 +109,6 @@ test.describe('Support > Departments', () => {
 
   async function removeAllDepartments(page: Page): Promise<void> {
     await page.goto('/admin/plugin/support_manager/admin_departments/');
-
-    for (let i = 0; i < 50; i++) {
-      // Find table element containing departments
-      const tableElement = await page.locator('#departments');
-
-      // Bail out once no delete links are left
-      const deleteLinks = await tableElement.getByRole('link', { name: 'Delete' }).all();
-      if (deleteLinks.length === 0) {
-        return;
-      }
-
-      // Click first delete link and confirm modal
-      await deleteLinks[0].click();
-      await handleModalPrompt(page);
-
-      // Ensure department was removed
-      await expectAdminMessage(page, 'department was successfully deleted');
-    }
-
-    throw new Error('Failed to remove all departments');
+    await deleteAdminTableItems(page, page.locator('table#departments'));
   }
 });

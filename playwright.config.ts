@@ -12,6 +12,7 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4200',
     trace: 'on-first-retry',
+    ignoreHTTPSErrors: true,
     ...devices['Desktop Chrome'],
   },
   projects: [
@@ -23,6 +24,11 @@ export default defineConfig({
       name: 'blesta-admin',
       testDir: './tests/blesta-admin',
       dependencies: ['blesta-setup'],
+    },
+    {
+      name: 'blesta-guest',
+      testDir: './tests/blesta-guest',
+      dependencies: ['blesta-admin'],
     },
   ],
 });

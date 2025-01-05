@@ -51,7 +51,7 @@ export async function runCommand(cmd: string, args: string[]): Promise<void> {
 
 async function getDatabaseConnection(
   host: string = 'localhost',
-  port: number = 4201,
+  port: number = 4202,
   user: string = 'blesta',
   password: string = 'blesta',
   database: string = 'blesta'

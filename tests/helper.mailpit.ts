@@ -21,7 +21,7 @@ interface Message {
 test.beforeEach(async ({ playwright }) => {
   if (!apiContext) {
     apiContext = await playwright.request.newContext({
-      baseURL: 'http://localhost:4202',
+      baseURL: 'http://localhost:4203',
     });
   }
 });

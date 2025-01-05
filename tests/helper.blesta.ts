@@ -26,6 +26,25 @@ export async function expectAdminMessage(page: Page, message: string): Promise<v
   await expect(messageElement).toBeVisible();
 }
 
+export async function deleteAdminTableItems(page: Page, locator: Locator): Promise<void> {
+  for (let i = 0; i < 50; i++) {
+    // Bail out once no delete links are left
+    const deleteLinks = await locator.getByRole('link', { name: 'Delete' }).all();
+    if (deleteLinks.length === 0) {
+      return;
+    }
+
+    // Click first delete link and confirm modal
+    await deleteLinks[0].click();
+    await handleModalPrompt(page);
+
+    // Ensure department was removed
+    await expectAdminMessage(page, 'was successfully deleted');
+  }
+
+  throw new Error('Failed to remove all items');
+}
+
 export function getFieldsetByTitle(page: Page, title: string): Locator {
   return page.locator('section.fieldset').getByRole('heading', { name: title }).locator('..');
 }

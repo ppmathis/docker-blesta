@@ -2,6 +2,20 @@
 name: blesta-test
 
 services:
+  proxy:
+    image: traefik:3
+    command:
+      - --accessLog=true
+      - --entryPoints.http.address=:8080/tcp
+      - --entryPoints.https.address=:8443/tcp
+      - --providers.file.filename=/etc/traefik/dynamic.yaml
+    ports:
+      - 4200:8080/tcp
+      - 4201:8443/tcp
+    configs:
+      - source: traefik-config
+        target: /etc/traefik/dynamic.yaml
+
   blesta:
     image: ${BLESTA_IMAGE:-localhost/blesta:latest}
     platform: ${BLESTA_PLATFORM:-}
@@ -20,8 +34,6 @@ services:
       BLESTA_ADDRESS: 127.0.0.1
       BLESTA_CRON_SCHEDULE: '#'
       BLESTA_HOST: localhost
-    ports:
-      - 4200:8080/tcp
     tmpfs:
       - /run:uid=65532,gid=65532,mode=0755,exec,nodev,nosuid
       - /tmp:uid=65532,gid=65532,mode=2777,noexec,nodev,nosuid
@@ -39,7 +51,7 @@ services:
       MARIADB_PASSWORD: blesta
       MARIADB_ROOT_PASSWORD: root
     ports:
-      - 4201:3306/tcp
+      - 4202:3306/tcp
     tmpfs:
       - /bitnami/mariadb
     configs:
@@ -56,10 +68,28 @@ services:
           - mailpit
           - mailpit.local
     ports:
-      - 4202:8025/tcp
-      - 4303:8080/tcp
+      - 4203:8025/tcp
 
 configs:
+  traefik-config:
+    content: |
+      http:
+        routers:
+          blesta-http:
+            rule: HostRegexp(`.+`)
+            service: blesta
+            entryPoints: [http]
+          blesta-https:
+            rule: HostRegexp(`.+`)
+            service: blesta
+            entryPoints: [https]
+            tls: {}
+        services:
+          blesta:
+            loadBalancer:
+              servers:
+                - url: http://blesta:8080
+
   mariadb-config:
     content: |
       [mysqld]
