@@ -147,6 +147,7 @@ RUN true \
 USER 65532:65532
 
 COPY --chown=0:0 --chmod=755 docker/s6-fatal /usr/local/bin/s6-fatal
+COPY --chown=0:0 --chmod=755 docker/blesta-cron /usr/local/bin/blesta-cron
 COPY --chown=0:0 --from=source-vector /usr/local/bin/vector /usr/local/bin/vector
 COPY --chown=0:0 --from=source-ioncube /usr/local/src/ioncube/ioncube_loader_lin_${PHP_VERSION}.so /opt/ioncube/ioncube_loader_lin.so
 
@@ -161,6 +162,7 @@ ENV S6_KILL_GRACETIME="0"
 ENV S6_READ_ONLY_ROOT="1"
 ENV S6_VERBOSITY="2"
 
+ENV BLESTA_CRON_HEALTHCHECK_URL=""
 ENV BLESTA_CRON_SCHEDULE="* * * * *"
 ENV BLESTA_MEMORY_LIMIT="256M"
 ENV BLESTA_UPLOAD_LIMIT="25M"

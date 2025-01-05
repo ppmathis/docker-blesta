@@ -59,6 +59,7 @@ The following environment variables must be configured when running this image:
 
 Additionally, further environment variables can be configured. These are not required to be set and already ship with sane defaults, but can be adjusted to your needs:
 
+- `BLESTA_CRON_HEALTHCHECK_URL` (default: not set) sets the URL to be called by cURL each time the Blesta cron job finishes. This can be used to trigger a periodic health check in your monitoring system. Check out [healthchecks.io](https://healthchecks.io/) for a free hosted service that can be used for this purpose.
 - `BLESTA_CRON_SCHEDULE` (default: `* * * * *`) sets the cron schedule for Blesta. By default, the cron job runs every minute. Use the special value `#` to disable the cron job completely.
 - `BLESTA_MEMORY_LIMIT` (default: `256M`) sets the maximum memory limit for PHP in Blesta.
 - `BLESTA_UPLOAD_LIMIT` (default: `25M`) sets the maximum upload size for files in Blesta. Please make sure that your reverse proxy in front of this container also allows uploads of this size.

@@ -1,1 +1,1 @@
-${BLESTA_CRON_SCHEDULE} /usr/bin/php -q /opt/blesta/public/index.php cron >/dev/null 2>&1
+${BLESTA_CRON_SCHEDULE} /usr/local/bin/blesta-cron

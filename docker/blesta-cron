@@ -1,0 +1,9 @@
+#!/usr/bin/execlineb -P
+with-contenv
+importas -S -D "" BLESTA_CRON_HEALTHCHECK_URL
+if {
+  redirfd -w 1 /dev/null
+  /usr/bin/php -q /opt/blesta/public/index.php cron
+}
+if -t { eltest -n "${BLESTA_CRON_HEALTHCHECK_URL}" }
+curl -fsSLo /dev/null "${BLESTA_CRON_HEALTHCHECK_URL}"

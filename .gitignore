@@ -1,6 +1,8 @@
+/.env
 /blob-report/
+/compose.override.yaml
+/local/
 /node_modules/
 /playwright-report/
 /playwright/.cache/
 /test-results/
-/.env
