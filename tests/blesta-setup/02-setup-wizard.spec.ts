@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test';
-import { runComposeE2E, waitForDatabase } from '../helper.stack';
+import { runComposeE2E, runDatabaseQuery, waitForDatabase } from '../helper.stack';
 
 test.describe('Initial Setup', () => {
   test.describe.configure({
@@ -65,5 +65,9 @@ test.describe('Initial Setup', () => {
     // Ensure redirect to admin dashboard after setup
     await expect(page).not.toHaveURL('**/admin/login/setup/');
     await page.waitForURL('**/admin/', { timeout: 60000 });
+  });
+
+  test('fix broken company hostname via mysql query', async ({}) => {
+    await runDatabaseQuery('UPDATE companies SET hostname = "localhost" WHERE id = 1');
   });
 });
