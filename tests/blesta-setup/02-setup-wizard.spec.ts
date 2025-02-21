@@ -14,6 +14,9 @@ test.describe('Initial Setup', () => {
     await runComposeE2E(['down', '-v']);
     await runComposeE2E(['up', '--detach', '--remove-orphans', '--renew-anon-volumes']);
 
+    // Stream E2E compose logs
+    runComposeE2E(['logs', '-f'], false);
+
     // Wait for database to be ready
     await waitForDatabase();
   });

@@ -1,11 +1,11 @@
 import { spawn } from 'child_process';
 import mysql from 'mysql2/promise';
 
-export async function runComposeE2E(args: string[]): Promise<void> {
-  await runCommand('docker', ['compose', '--ansi', 'never', '-f', 'compose.test.yaml', ...args]);
+export async function runComposeE2E(args: string[], wait: boolean = true): Promise<void> {
+  await runCommand('docker', ['compose', '--ansi', 'never', '-f', 'compose.test.yaml', ...args], wait);
 }
 
-export async function runCommand(cmd: string, args: string[]): Promise<void> {
+export async function runCommand(cmd: string, args: string[], wait: boolean = true): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args);
     const outputBuffers = { stdout: '', stderr: '' };
@@ -27,6 +27,12 @@ export async function runCommand(cmd: string, args: string[]): Promise<void> {
     handleStream(child.stdout, 'stdout', console.log);
     handleStream(child.stderr, 'stderr', console.error);
 
+    child.on('spawn', () => {
+      if (!wait) {
+        resolve();
+      }
+    });
+
     // Resolve promise when process exits
     child.on('close', (code) => {
       // Ensure all output is flushed before resolving
@@ -35,6 +41,11 @@ export async function runCommand(cmd: string, args: string[]): Promise<void> {
 
       const remainingStderr = outputBuffers.stderr.trim();
       if (remainingStderr) console.error(remainingStderr);
+
+      // Skip further processing if not waiting for process to exit
+      if (!wait) {
+        return;
+      }
 
       // Check if the process exited with a non-zero code
       if (code !== 0) {
