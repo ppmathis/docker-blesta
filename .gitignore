@@ -3,6 +3,7 @@
 /compose.override.yaml
 /local/
 /node_modules/
+/playwright-report.7z
 /playwright-report/
 /playwright/.cache/
 /test-results/

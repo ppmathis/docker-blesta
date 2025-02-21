@@ -109,6 +109,20 @@ jobs:
           BLESTA_IMAGE: localhost:5000/blesta:${{ github.sha }}
           BLESTA_LICENSE_KEY: ${{ secrets.BLESTA_LICENSE_KEY }}
 
+      - name: Create archive of Playwright report
+        if: ${{ !cancelled() }}
+        run: 7z a -t7z -mhe=on -p"${ARTIFACT_PASSWORD}" playwright-report.7z playwright-report/
+        env:
+          ARTIFACT_PASSWORD: ${{ secrets.ARTIFACT_PASSWORD }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report.7z
+          retention-days: 1
+
       - name: Push image
         uses: docker/bake-action@v5
         with:
