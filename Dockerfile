@@ -51,6 +51,7 @@ RUN true \
 # Ioncube Source
 ################################################################################
 FROM base AS source-ioncube
+ARG IONCUBE_VERSION="14.0.0"
 
 USER 0:0
 RUN install -d -o 65532 -g 65532 -m 0700 /usr/local/src/ioncube
@@ -59,7 +60,7 @@ USER 65532:65532
 RUN true \
   && ARCH="$(uname -m | sed -e 's/x86_64/x86-64/;s/aarch64/aarch64/;t;d')" \
   && if [ -z "${ARCH}" ]; then echo "Unknown architecture: $(uname -m)" 2>&1 && exit 1; fi \
-  && curl -fsSLo "/tmp/ioncube.tar.gz" "https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_${ARCH}.tar.gz" \
+  && curl -fsSLo "/tmp/ioncube.tar.gz" "https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_${ARCH}_${IONCUBE_VERSION}.tar.gz" \
   && tar -xf "/tmp/ioncube.tar.gz" -C /usr/local/src/ioncube --strip-components=1 \
   && rm -f "/tmp/ioncube.tar.gz" \
   && true
