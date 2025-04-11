@@ -13,7 +13,9 @@ variable "PLATFORMS" {
 
 variable "VERSIONS" {
   default = [
-    { blesta-version = "5.11.0", blesta-download-id = "262", alpine-version = "3.21", php-version = "8.2", extra-tags = ["latest"] },
+    { blesta-version = "5.11.2", blesta-download-id = "266", alpine-version = "3.21", php-version = "8.2", extra-tags = ["latest"] },
+    { blesta-version = "5.11.1", blesta-download-id = "264", alpine-version = "3.21", php-version = "8.2", extra-tags = [] },
+    { blesta-version = "5.11.0", blesta-download-id = "262", alpine-version = "3.21", php-version = "8.2", extra-tags = [] },
     { blesta-version = "5.10.3", blesta-download-id = "256", alpine-version = "3.21", php-version = "8.2", extra-tags = [] },
   ]
 }
