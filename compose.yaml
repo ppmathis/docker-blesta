@@ -28,6 +28,7 @@ services:
   mariadb:
     image: docker.io/library/mariadb:11
     cap_add:
+      - CHOWN
       - DAC_OVERRIDE
       - SETGID
       - SETUID
