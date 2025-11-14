@@ -86,6 +86,7 @@ RUN true \
   && apk add --no-cache \
   envsubst \
   inotify-tools \
+  mariadb-client \
   nginx \
   "php${PHP_VERSION}" \
   "php${PHP_VERSION}-curl" \
