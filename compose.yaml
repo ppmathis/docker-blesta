@@ -26,7 +26,11 @@ services:
       - mariadb
 
   mariadb:
-    image: bitnami/mariadb:11.5
+    image: docker.io/library/mariadb:11
+    cap_add:
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
     cap_drop:
       - ALL
     environment:
@@ -37,10 +41,10 @@ services:
     networks:
       internal: {}
     volumes:
-      - mariadb-data:/bitnami/mariadb
+      - mariadb-data:/var/lib/mysql
     configs:
       - source: mariadb-config
-        target: /opt/bitnami/mariadb/conf/my_custom.cnf
+        target: /etc/mysql/conf.d/blesta.cnf
 
 volumes:
   blesta-data: {}

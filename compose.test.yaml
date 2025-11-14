@@ -32,7 +32,7 @@ services:
       - ALL
     environment:
       BLESTA_ADDRESS: 127.0.0.1
-      BLESTA_CRON_SCHEDULE: '#'
+      BLESTA_CRON_SCHEDULE: "#"
       BLESTA_HOST: localhost
     tmpfs:
       - /run:uid=65532,gid=65532,mode=0755,exec,nodev,nosuid
@@ -42,7 +42,11 @@ services:
       - mailpit
 
   mariadb:
-    image: bitnami/mariadb:11.5
+    image: docker.io/library/mariadb:11
+    cap_add:
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
     cap_drop:
       - ALL
     environment:
@@ -53,10 +57,10 @@ services:
     ports:
       - 4202:3306/tcp
     tmpfs:
-      - /bitnami/mariadb
+      - /var/lib/mysql
     configs:
       - source: mariadb-config
-        target: /opt/bitnami/mariadb/conf/my_custom.cnf
+        target: /etc/mysql/conf.d/blesta.cnf
 
   mailpit:
     image: axllent/mailpit:latest
