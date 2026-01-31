@@ -16,7 +16,8 @@ test.describe('Support > Departments', () => {
 
     await page.goto('/admin/plugin/support_manager/admin_departments/add/');
     await page.getByRole('textbox', { name: 'Name' }).fill('Support');
-    await page.getByRole('textbox', { name: 'Description' }).fill('Support Department');
+    await setDepartmentDescription(page, 'Support Department');
+    // await page.locator('[aria-label="Description"]').fill('Support Department');
     await page.getByRole('checkbox', { name: 'Allow only clients to open or reply to tickets' }).uncheck();
     await page.getByRole('textbox', { name: 'Email' }).fill('support@example.com');
     await page.getByRole('checkbox', { name: 'Automatically transition ticket status on admin reply' }).uncheck();
@@ -45,7 +46,7 @@ test.describe('Support > Departments', () => {
       'client@example.com',
       'support@example.com',
       'Test Ticket via Mail',
-      'This is a test ticket via email'
+      'This is a test ticket via email',
     );
 
     // Run manual cron to fetch emails
@@ -65,7 +66,7 @@ test.describe('Support > Departments', () => {
     await page.locator('table#ticket_list tr > td > a').first().click();
 
     // Write dummy text for ticket reply
-    await page.locator('textarea[name="details"]').fill('This reply contains an attachment');
+    await setTicketReply(page, 'This reply contains an attachment');
 
     // Attach a file to the ticket reply
     const fileChooserPromise = page.waitForEvent('filechooser');
@@ -110,5 +111,42 @@ test.describe('Support > Departments', () => {
   async function removeAllDepartments(page: Page): Promise<void> {
     await page.goto('/admin/plugin/support_manager/admin_departments/');
     await deleteAdminTableItems(page, page.locator('table#departments'));
+  }
+
+  async function setDepartmentDescription(page: Page, value: string): Promise<void> {
+    const label = page.locator('label[for="description"]');
+    const oldTextArea = page.locator('#description');
+    const newEditor = label.locator('..').locator('[contenteditable="true"]').first();
+
+    if (await oldTextArea.isVisible().catch(() => false)) {
+      await oldTextArea.fill(value);
+      return;
+    }
+
+    await newEditor.click();
+    await newEditor.fill(value);
+  }
+
+  async function setTicketReply(page: Page, value: string): Promise<void> {
+    const oldTextArea = page.locator('textarea[name="details"]');
+    const newEditor = page
+      .locator('#reply_details')
+      .locator('..')
+      .locator('.toastui-editor-ww-container')
+      .locator('[contenteditable="true"]')
+      .first();
+
+    await Promise.race([
+      oldTextArea.waitFor({ state: 'attached' }).catch(() => {}),
+      newEditor.waitFor({ state: 'attached' }).catch(() => {}),
+    ]);
+
+    if (await oldTextArea.isVisible().catch(() => false)) {
+      await oldTextArea.fill(value);
+      return;
+    }
+
+    await newEditor.click();
+    await newEditor.fill(value);
   }
 });

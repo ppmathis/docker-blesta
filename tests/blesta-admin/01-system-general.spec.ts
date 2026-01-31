@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { expectAdminMessage, loginAdmin } from '../helper.blesta';
+import { expectAdminMessage, handleAccessVerification, loginAdmin } from '../helper.blesta';
 
 test.describe('System > General', () => {
   test('should manage basic setup', async ({ page }) => {
     await loginAdmin(page);
     await page.goto('/admin/settings/system/general/basic/');
+    await handleAccessVerification(page);
 
     await expect(page.getByRole('textbox', { name: 'Root Web Directory' })).toHaveValue('/opt/blesta/public/');
     await page.getByRole('textbox', { name: 'Temp Directory' }).fill('/var/tmp/blesta/');

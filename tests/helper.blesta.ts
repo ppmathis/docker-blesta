@@ -11,6 +11,17 @@ export async function loginAdmin(page: Page): Promise<void> {
   await page.waitForURL('**/admin/');
 }
 
+export async function handleAccessVerification(page: Page): Promise<boolean> {
+  const heading = await page.getByRole('heading', { name: /Access Verification/ });
+  const present = await heading.isVisible().catch(() => false);
+  if (!present) return false;
+
+  await page.getByRole('textbox', { name: 'password' }).fill('password');
+  await page.getByRole('button', { name: 'Verify Access' }).click();
+
+  return true;
+}
+
 export async function handleModalPrompt(page: Page, button: string = 'Yes'): Promise<void> {
   const modalElement = await page.locator('.qtip-modal');
   await expect(modalElement).toBeVisible();

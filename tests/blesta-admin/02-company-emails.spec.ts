@@ -1,11 +1,12 @@
 import { test } from '@playwright/test';
-import { expectAdminMessage, loginAdmin } from '../helper.blesta';
+import { expectAdminMessage, handleAccessVerification, loginAdmin } from '../helper.blesta';
 import { deleteAllMails, expectMail } from '../helper.mailpit';
 
 test.describe('Company > Emails', () => {
   test('should manage mail settings', async ({ page }) => {
     await loginAdmin(page);
     await page.goto('/admin/settings/company/emails/mail/');
+    await handleAccessVerification(page);
 
     await page.getByRole('combobox', { name: 'Delivery Method' }).selectOption('SMTP');
     await page.getByRole('textbox', { name: 'SMTP Host' }).fill('mailpit');
