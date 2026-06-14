@@ -8,11 +8,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "mysql2": "^3.12.0"
+    "mysql2": "^3.22.5"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.1",
-    "@types/node": "^22.10.2"
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^22.19.21"
   },
   "prettier": {
     "printWidth": 120,
