@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 0 * * *"
+    - cron: '0 0 * * *'
   push:
     branches:
       - main
@@ -98,7 +98,7 @@ jobs:
           push: true
         env:
           IMAGE_NAMES: localhost:5000/blesta:${{ github.sha }}
-          DOCKER_BUILD_SUMMARY: "false"
+          DOCKER_BUILD_SUMMARY: 'false'
 
       - name: Test image for AMD64
         run: npx playwright test
@@ -147,3 +147,12 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
           repository: ppmathis/blesta
           enable-url-completion: true
+
+  build-status:
+    runs-on: ubuntu-24.04
+    needs:
+      - build
+    if: ${{ always() }}
+    steps:
+      - name: Verify all targets built successfully
+        run: test "${{ needs.build.result }}" = "success"
