@@ -26,3 +26,16 @@ test.describe('Company > Emails', () => {
     await expectMail('billing@example.com', 'admin@example.com', 'SMTP connection was successful!');
   });
 });
+
+test.describe('Company > Look and Feel', () => {
+  test('should upload a PNG logo (issue #4)', async ({ page }) => {
+    await loginAdmin(page);
+    await page.goto('/admin/settings/company/lookandfeel/customize/');
+    await handleAccessVerification(page);
+
+    await page.locator('#admin_logo').setInputFiles('assets/blesta-logo-color.png');
+    await page.getByRole('button', { name: 'Save' }).click();
+
+    await expectAdminMessage(page, 'The custom logo was successfully updated.');
+  });
+});
