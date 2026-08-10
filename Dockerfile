@@ -90,6 +90,7 @@ RUN true \
   nginx \
   "php${PHP_VERSION}" \
   "php${PHP_VERSION}-curl" \
+  "php${PHP_VERSION}-fileinfo" \
   "php${PHP_VERSION}-fpm" \
   "php${PHP_VERSION}-gd" \
   "php${PHP_VERSION}-gmp" \
