@@ -3,7 +3,8 @@ name: blesta
 
 services:
   blesta:
-    image: ${BLESTA_IMAGE:-ppmathis/blesta:latest}
+    restart: unless-stopped
+    image: ${BLESTA_IMAGE:-ppmathis/blesta:6.0.3-php8.3}
     read_only: true
     security_opt:
       - no-new-privileges:true
@@ -12,21 +13,33 @@ services:
     environment:
       BLESTA_ADDRESS: ${BLESTA_ADDRESS:?Missing BLESTA_ADDRESS}
       BLESTA_HOST: ${BLESTA_HOST:?Missing BLESTA_HOST}
+      BLESTA_CRON_SCHEDULE: ${BLESTA_CRON_SCHEDULE:-* * * * *}
+      BLESTA_CRON_HEALTHCHECK_URL: ${BLESTA_CRON_HEALTHCHECK_URL:-}
+      BLESTA_MEMORY_LIMIT: ${BLESTA_MEMORY_LIMIT:-512M}
+      BLESTA_UPLOAD_LIMIT: ${BLESTA_UPLOAD_LIMIT:-25M}
     networks:
       public: {}
       internal: {}
     ports:
-      - ${BLESTA_HTTP_PORT:-8080}:8080/tcp
+      - 127.0.0.1:${BLESTA_HTTP_PORT:-8080}:8080/tcp
     volumes:
       - blesta-data:/opt/blesta/data
     tmpfs:
       - /run:uid=65532,gid=65532,mode=0755,exec,nodev,nosuid
       - /tmp:uid=65532,gid=65532,mode=2777,noexec,nodev,nosuid
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
 
   mariadb:
-    image: docker.io/library/mariadb:11
+    restart: unless-stopped
+    image: docker.io/library/mariadb:11.4
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
     cap_add:
       - CHOWN
       - DAC_OVERRIDE

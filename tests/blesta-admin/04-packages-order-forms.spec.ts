@@ -6,6 +6,7 @@ test.describe('Packages > Order Forms', () => {
     const page = await browser.newPage();
     await loginAdmin(page);
     await removeAllOrderForms(page);
+    await page.close();
   });
 
   test('should create basic http order form', async ({ page }) => {
@@ -15,6 +16,7 @@ test.describe('Packages > Order Forms', () => {
     await page.getByRole('textbox', { name: 'Name' }).fill('Basic - HTTP');
     await page.getByRole('textbox', { name: 'Label' }).fill('basic-http');
 
+    await page.locator('input[type="checkbox"][name="currencies[]"][value="USD"]').check();
     await page.getByRole('button', { name: 'Add Form' }).click();
     await expectAdminMessage(page, 'The form was successfully added.');
   });
@@ -27,6 +29,7 @@ test.describe('Packages > Order Forms', () => {
     await page.getByRole('textbox', { name: 'Label' }).fill('basic-https');
     await page.getByRole('checkbox', { name: 'Force Secure Connection (HTTPS)' }).check();
 
+    await page.locator('input[type="checkbox"][name="currencies[]"][value="USD"]').check();
     await page.getByRole('button', { name: 'Add Form' }).click();
     await expectAdminMessage(page, 'The form was successfully added.');
   });

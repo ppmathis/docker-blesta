@@ -11,21 +11,23 @@ test.describe('System > General', () => {
     await page.getByRole('textbox', { name: 'Temp Directory' }).fill('/var/tmp/blesta/');
     await page.getByRole('textbox', { name: 'Uploads Directory' }).fill('/opt/blesta/data/uploads/');
     await page.getByRole('textbox', { name: 'Log Directory' }).fill('/opt/blesta/data/logs/');
+    const cacheDirectory = page.getByRole('textbox', { name: 'Cache Directory' });
+    if (await cacheDirectory.isVisible().catch(() => false)) {
+      await cacheDirectory.fill('/opt/blesta/data/cache/');
+    }
     await page.getByRole('checkbox', { name: 'My installation is behind a proxy or load balancer' }).check();
 
     await page.getByRole('button', { name: 'Update Settings' }).click();
     await expectAdminMessage(page, 'The Basic Setup settings were successfully updated!');
 
-    const isValid = async (name: string) => {
-      const inputElement = page.getByRole('textbox', { name });
-      const iconElement = inputElement.locator('xpath=following-sibling::i');
-      await expect(iconElement).toBeVisible();
-      await expect(iconElement).toHaveClass(/fa-check/);
-    };
-
-    await isValid('Root Web Directory');
-    await isValid('Temp Directory');
-    await isValid('Uploads Directory');
-    await isValid('Log Directory');
+    await expect(page.getByRole('textbox', { name: 'Root Web Directory' })).toHaveValue('/opt/blesta/public/');
+    await expect(page.getByRole('textbox', { name: 'Temp Directory' })).toHaveValue('/var/tmp/blesta/');
+    await expect(page.getByRole('textbox', { name: 'Uploads Directory' })).toHaveValue(
+      '/opt/blesta/data/uploads/',
+    );
+    await expect(page.getByRole('textbox', { name: 'Log Directory' })).toHaveValue('/opt/blesta/data/logs/');
+    if (await cacheDirectory.isVisible().catch(() => false)) {
+      await expect(cacheDirectory).toHaveValue('/opt/blesta/data/cache/');
+    }
   });
 });

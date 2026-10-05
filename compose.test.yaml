@@ -10,8 +10,8 @@ services:
       - --entryPoints.https.address=:8443/tcp
       - --providers.file.filename=/etc/traefik/dynamic.yaml
     ports:
-      - 4200:8080/tcp
-      - 4201:8443/tcp
+      - 127.0.0.1:4200:8080/tcp
+      - 127.0.0.1:4201:8443/tcp
     configs:
       - source: traefik-config
         target: /etc/traefik/dynamic.yaml
@@ -19,12 +19,6 @@ services:
   blesta:
     image: ${BLESTA_IMAGE:-localhost/blesta:latest}
     platform: ${BLESTA_PLATFORM:-}
-    develop:
-      watch:
-        - path: Dockerfile
-          action: rebuild
-        - path: docker/
-          action: rebuild
     read_only: true
     security_opt:
       - no-new-privileges:true
@@ -32,17 +26,28 @@ services:
       - ALL
     environment:
       BLESTA_ADDRESS: 127.0.0.1
-      BLESTA_CRON_SCHEDULE: "#"
+      BLESTA_CRON_SCHEDULE: ${BLESTA_TEST_CRON_SCHEDULE:-#}
+      BLESTA_CRON_HEALTHCHECK_URL: http://cron-monitor:8080/ping
       BLESTA_HOST: localhost
+    volumes:
+      - blesta-data:/opt/blesta/data
     tmpfs:
       - /run:uid=65532,gid=65532,mode=0755,exec,nodev,nosuid
       - /tmp:uid=65532,gid=65532,mode=2777,noexec,nodev,nosuid
     depends_on:
-      - mariadb
-      - mailpit
+      mariadb:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
 
   mariadb:
-    image: docker.io/library/mariadb:11
+    image: docker.io/library/mariadb:11.4
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
     cap_add:
       - CHOWN
       - DAC_OVERRIDE
@@ -56,12 +61,27 @@ services:
       MARIADB_PASSWORD: blesta
       MARIADB_ROOT_PASSWORD: root
     ports:
-      - 4202:3306/tcp
-    tmpfs:
-      - /var/lib/mysql
+      - 127.0.0.1:4202:3306/tcp
+    volumes:
+      - mariadb-data:/var/lib/mysql
     configs:
       - source: mariadb-config
         target: /etc/mysql/conf.d/blesta.cnf
+
+  cron-monitor:
+    image: docker.io/library/node:24-alpine
+    command:
+      - node
+      - -e
+      - |
+        const http = require('node:http');
+        let count = 0;
+        http.createServer((req, res) => {
+          if (req.url === '/ping') count++;
+          res.end(String(count));
+        }).listen(8080, '0.0.0.0');
+    ports:
+      - 127.0.0.1:4204:8080
 
   mailpit:
     image: axllent/mailpit:latest
@@ -73,7 +93,7 @@ services:
           - mailpit
           - mailpit.local
     ports:
-      - 4203:8025/tcp
+      - 127.0.0.1:4203:8025/tcp
 
 configs:
   traefik-config:
@@ -100,3 +120,7 @@ configs:
       [mysqld]
       max_allowed_packet=128M
       wait_timeout=3600
+
+volumes:
+  blesta-data: {}
+  mariadb-data: {}

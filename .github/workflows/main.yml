@@ -2,13 +2,15 @@ name: CI
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
+  push:
+    branches: [main]
   schedule:
     - cron: '0 0 * * *'
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   prepare:
@@ -16,19 +18,17 @@ jobs:
     outputs:
       targets: ${{ steps.generate.outputs.targets }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: List Bake targets
         id: generate
-        uses: docker/bake-action/subaction/list-targets@v4
+        uses: docker/bake-action/subaction/list-targets@v6
         with:
           files: docker-bake.hcl
 
   build:
     runs-on: ubuntu-24.04
-    needs:
-      - prepare
+    timeout-minutes: 30
+    needs: prepare
     strategy:
       fail-fast: false
       matrix:
@@ -36,123 +36,183 @@ jobs:
     services:
       registry:
         image: registry:2
-        ports:
-          - 5000:5000
-    permissions:
-      attestations: write
-      contents: read
-      id-token: write
-      packages: write
+        ports: ['5000:5000']
     env:
-      SOURCE_DATE_EPOCH: 0
+      CANDIDATE_IMAGE: localhost:5000/blesta:${{ github.sha }}-${{ matrix.target }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/login-action@v3
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-docker-action@v4
         with:
-          registry: docker.io
+          daemon-config: '{"features":{"containerd-snapshotter":true}}'
+      - uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version: '24'
+      - run: npm ci
+      - name: Validate build configuration
+        run: npm run check
+      - uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+      - name: Build selected candidate
+        id: candidate
+        uses: docker/bake-action@v6
+        with:
+          files: docker-bake.hcl
+          targets: ${{ matrix.target }}
+          push: true
+        env:
+          IMAGE_NAMES: ${{ env.CANDIDATE_IMAGE }}
+          DOCKER_BUILD_SUMMARY: 'false'
+      - name: Record candidate identity
+        env:
+          BUILD_METADATA: ${{ steps.candidate.outputs.metadata }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          docker buildx bake -f docker-bake.hcl "$TARGET" --print > selected.json
+          node - <<'JS'
+          const fs = require('fs');
+          const metadata = JSON.parse(process.env.BUILD_METADATA);
+          const digest = metadata[process.env.TARGET]['containerimage.digest'];
+          if (!/^sha256:[a-f0-9]{64}$/.test(digest)) throw new Error('Missing candidate digest');
+          fs.appendFileSync(process.env.GITHUB_ENV, `CANDIDATE_DIGEST=${digest}\n`);
+          fs.writeFileSync('candidate-digest.txt', digest + '\n');
+          JS
+      - name: Export candidate with provenance and SBOM
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+          skopeo copy --all --preserve-digests --src-tls-verify=false "docker://localhost:5000/blesta@${CANDIDATE_DIGEST}" oci-archive:candidate.tar
+          test "sha256:$(skopeo inspect --raw oci-archive:candidate.tar | sha256sum | cut -d' ' -f1)" = "$(cat candidate-digest.txt)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: candidate-${{ matrix.target }}
+          path: |
+            candidate.tar
+            candidate-digest.txt
+            selected.json
+          retention-days: 1
+
+  validate:
+    needs: [prepare, build]
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJson(needs.prepare.outputs.targets) }}
+        arch: [amd64, arm64]
+    # ionCube file compilation is not reliably supported under user-mode emulation.
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    services:
+      registry:
+        image: registry:2
+        ports: ['5000:5000']
+    env:
+      BLESTA_LICENSE_KEY: ${{ secrets.BLESTA_LICENSE_KEY }}
+      ARTIFACT_PASSWORD: ${{ secrets.ARTIFACT_PASSWORD }}
+      BLESTA_PLATFORM: linux/${{ matrix.arch }}
+      PLAYWRIGHT_REPORT_DIR: playwright-report/${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-docker-action@v4
+        with:
+          daemon-config: '{"features":{"containerd-snapshotter":true}}'
+      - uses: actions/download-artifact@v4
+        with:
+          name: candidate-${{ matrix.target }}
+          path: candidate
+      - uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Import exact candidate for native validation
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo p7zip-full
+          test "sha256:$(skopeo inspect --raw oci-archive:candidate/candidate.tar | sha256sum | cut -d' ' -f1)" = "$(cat candidate/candidate-digest.txt)"
+          skopeo copy --all --preserve-digests --dest-tls-verify=false oci-archive:candidate/candidate.tar docker://localhost:5000/blesta:validate
+          test "sha256:$(skopeo inspect --tls-verify=false --raw docker://localhost:5000/blesta:validate | sha256sum | cut -d' ' -f1)" = "$(cat candidate/candidate-digest.txt)"
+          node - <<'JS'
+          const fs = require('fs');
+          const digest = fs.readFileSync('candidate/candidate-digest.txt', 'utf8').trim();
+          const args = JSON.parse(fs.readFileSync('candidate/selected.json')).target[process.env.TARGET].args;
+          fs.appendFileSync(process.env.GITHUB_ENV, `BLESTA_IMAGE=localhost:5000/blesta@${digest}\nBLESTA_EXPECTED_VERSION=${args.BLESTA_VERSION}\nBLESTA_EXPECTED_PHP=${args.PHP_VERSION}\n`);
+          JS
+      - name: Verify license redaction
+        run: npm run test:reporter
+      - name: Test native architecture
+        run: npm test
+      - name: Encrypt diagnostics
+        id: diagnostics
+        if: ${{ !cancelled() && env.ARTIFACT_PASSWORD != '' && hashFiles('playwright-report/**') != '' }}
+        run: 7z a -t7z -mhe=on -p"${ARTIFACT_PASSWORD}" playwright-report.7z playwright-report/
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.diagnostics.outcome == 'success' }}
+        with:
+          name: reports-${{ matrix.target }}-${{ matrix.arch }}
+          path: playwright-report.7z
+          if-no-files-found: error
+          retention-days: 1
+
+  build-status:
+    runs-on: ubuntu-24.04
+    needs: [prepare, build, validate]
+    if: always()
+    steps:
+      - run: test '${{ needs.prepare.result }}' = success && test '${{ needs.build.result }}' = success && test '${{ needs.validate.result }}' = success
+
+  publish:
+    runs-on: ubuntu-24.04
+    needs: [prepare, build-status]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule')
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        target: ${{ fromJson(needs.prepare.outputs.targets) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: candidate-${{ matrix.target }}
+          path: candidate
+      - uses: docker/login-action@v3
+        with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
-      - name: Login to GitHub Container Registry
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/login-action@v3
+      - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Setup Docker
-        uses: docker/setup-docker-action@v4
-        with:
-          daemon-config: |
-            {
-              "debug": true,
-              "features": {
-                "containerd-snapshotter": true
-              }
-            }
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          cache: npm
-          node-version: lts/*
-
-      - name: Install Node.js dependencies
-        run: npm ci
-
-      - name: Install Playwright dependencies
-        run: npx playwright install --with-deps
-
-      - name: Build image
-        uses: docker/bake-action@v5
-        with:
-          files: docker-bake.hcl
-          push: true
+      - name: Promote tested image without rebuilding
         env:
-          IMAGE_NAMES: localhost:5000/blesta:${{ github.sha }}
-          DOCKER_BUILD_SUMMARY: 'false'
+          TARGET: ${{ matrix.target }}
+          IMAGE_NAMES: ghcr.io/ppmathis/blesta:<version>,docker.io/ppmathis/blesta:<version>
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+          test "sha256:$(skopeo inspect --raw oci-archive:candidate/candidate.tar | sha256sum | cut -d' ' -f1)" = "$(cat candidate/candidate-digest.txt)"
+          docker buildx bake -f docker-bake.hcl "$TARGET" --print > publish.json
+          jq -r --arg target "$TARGET" '.target[$target].tags[]' publish.json | while read -r tag; do
+            skopeo copy --all --preserve-digests oci-archive:candidate/candidate.tar "docker://${tag}"
+            test "sha256:$(skopeo inspect --raw "docker://${tag}" | sha256sum | cut -d' ' -f1)" = "$(cat candidate/candidate-digest.txt)"
+          done
 
-      - name: Test image for AMD64
-        run: npx playwright test
-        env:
-          BLESTA_PLATFORM: linux/amd64
-          BLESTA_IMAGE: localhost:5000/blesta:${{ github.sha }}
-          BLESTA_LICENSE_KEY: ${{ secrets.BLESTA_LICENSE_KEY }}
-
-      - name: Test image for ARM64
-        run: npx playwright test
-        env:
-          BLESTA_PLATFORM: linux/arm64
-          BLESTA_IMAGE: localhost:5000/blesta:${{ github.sha }}
-          BLESTA_LICENSE_KEY: ${{ secrets.BLESTA_LICENSE_KEY }}
-
-      - name: Create archive of Playwright report
-        if: ${{ !cancelled() }}
-        run: 7z a -t7z -mhe=on -p"${ARTIFACT_PASSWORD}" playwright-report.7z playwright-report/
-        env:
-          ARTIFACT_PASSWORD: ${{ secrets.ARTIFACT_PASSWORD }}
-
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report-${{ matrix.target }}
-          path: playwright-report.7z
-          retention-days: 1
-
-      - name: Push image
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/bake-action@v5
-        with:
-          files: docker-bake.hcl
-          push: true
-        env:
-          IMAGE_NAMES: >-
-            ghcr.io/ppmathis/blesta:<version>,
-            docker.io/ppmathis/blesta:<version>
-
-      - name: Update Docker Hub description
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: peter-evans/dockerhub-description@v4
+  description:
+    runs-on: ubuntu-24.04
+    needs: publish
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peter-evans/dockerhub-description@v4
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
           repository: ppmathis/blesta
           enable-url-completion: true
-
-  build-status:
-    runs-on: ubuntu-24.04
-    needs:
-      - build
-    if: ${{ always() }}
-    steps:
-      - name: Verify all targets built successfully
-        run: test "${{ needs.build.result }}" = "success"

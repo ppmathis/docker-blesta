@@ -1,6 +1,6 @@
-/blob-report/
-/node_modules/
-/playwright-report/
-/playwright/.cache/
-/test-results/
-/tests/
+# The build only needs the Dockerfile and runtime configuration.
+# Keep licenses, local overrides, source control, reports, and backup data out.
+**
+!Dockerfile
+!docker/
+!docker/**
