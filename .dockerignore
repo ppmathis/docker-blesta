@@ -1,16 +1,6 @@
-/blob-report/
-/node_modules/
-/playwright-report/
-/playwright/.cache/
-/test-results/
-/tests/
-/.git/
-/.env
-/.env.*
-!/.env.example
-/compose.override.yaml
-/local/
-/*.7z
-/.agents/
-/.codex/
-/.aws/
+# The build only needs the Dockerfile and runtime configuration.
+# Keep licenses, local overrides, source control, reports, and backup data out.
+**
+!Dockerfile
+!docker/
+!docker/**

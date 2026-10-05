@@ -33,7 +33,7 @@ With security in mind, this image is built with the following features:
 - Fully automated builds with GitHub Actions including SBOM and Provenance
 - Multi-architecture support for x86-64 and ARM64
 - Proper license handling without static IPs or host-networking
-- Running completely rootless as 65532:65532 (nonroot:nonroot)
+- Runs as nonroot user 65532:65532 (nonroot:nonroot)
 - Runs out-of-the-box with all required PHP extensions
 - Support for `--read-only`, `--cap-drop ALL` and `--security-opt no-new-privileges`
 - Unified logging architecture, all Blesta logs are streamed to stdout
@@ -46,7 +46,7 @@ Please note that this image is not officially supported by Phillips Data, Inc. a
 
 You may pull this image either from Docker Hub via `ppmathis/blesta` or from GitHub Container Registry via `ghcr.io/ppmathis/blesta`. Both registries are automatically maintained by GitHub Actions and in sync. All images are automatically built on a daily basis to ensure freshness and security.
 
-All images are tagged like `<blesta-version>-php<php-version>`, e.g. `5.10.3-php8.2`, and use the latest available Alpine Linux version that ships with the specified PHP version. You can find a list of all tags by checking the [Docker Hub](https://hub.docker.com/r/ppmathis/blesta/tags) or [GitHub Container Registry](https://github.com/ppmathis/docker-blesta/pkgs/container/blesta) repositories. Please note that while a `latest` tag is available, you should NEVER use it in production, and pin a specific version along with manually testing upgrades in a staging environment.
+All images are tagged like `<blesta-version>-php<php-version>`, e.g. `5.10.3-php8.2`, and use the Alpine Linux version specified in `docker-bake.hcl`. You can find a list of all tags by checking the [Docker Hub](https://hub.docker.com/r/ppmathis/blesta/tags) or [GitHub Container Registry](https://github.com/ppmathis/docker-blesta/pkgs/container/blesta) repositories. Please note that while a `latest` tag is available, you should NEVER use it in production, and pin a specific version along with manually testing upgrades in a staging environment.
 
 Missing any specific tag? Feel free to open an issue on the [GitHub repository](https://github.com/ppmathis/docker-blesta/issues) and I'll add it as soon as possible.
 
@@ -61,10 +61,10 @@ Additionally, further environment variables can be configured. These are not req
 
 - `BLESTA_CRON_HEALTHCHECK_URL` (default: not set) sets the URL to be called by cURL each time the Blesta cron job finishes. This can be used to trigger a periodic health check in your monitoring system. Check out [healthchecks.io](https://healthchecks.io/) for a free hosted service that can be used for this purpose.
 - `BLESTA_CRON_SCHEDULE` (default: `* * * * *`) sets the cron schedule for Blesta. By default, the cron job runs every minute. Use the special value `#` to disable the cron job completely.
-- `BLESTA_MEMORY_LIMIT` (default: `256M`) sets the maximum memory limit for PHP in Blesta.
+- `BLESTA_MEMORY_LIMIT` (default: `256M` for Blesta 5, `512M` for Blesta 6) sets the maximum memory limit for PHP in Blesta.
 - `BLESTA_UPLOAD_LIMIT` (default: `25M`) sets the maximum upload size for files in Blesta. Please make sure that your reverse proxy in front of this container also allows uploads of this size.
 
-This image expects you to mount `/opt/blesta/data` to a local directory or Docker volume to persist the Blesta data directory. This directory contains all uploaded files, logs, and other data that should persist across container restarts. An anonymous volume is used by default, but all data will be lost when the container is removed. A second anonymous volume for `/var/tmp` is also defined to store temporary data, but this directory can safely be transient. The container will automatically create missing subdirectories during startup in `/opt/blesta/data` and `/var/tmp/blesta` if they don't exist.
+This image expects you to mount `/opt/blesta/data` to a local directory or Docker volume to persist the Blesta data directory. This directory contains all uploaded files, logs, and other data that should persist across container restarts. The Compose stack uses a named volume. Standalone containers use an anonymous volume by default, which must be reattached when recreating the container. A second anonymous volume for `/var/tmp` is also defined to store temporary data, but this directory can safely be transient. The container will automatically create missing subdirectories during startup in `/opt/blesta/data` and `/var/tmp/blesta` if they don't exist.
 
 ## Deployment
 
@@ -77,7 +77,7 @@ MARIADB_BLESTA_PASSWORD="<replace-me>" # secure password for the `blesta` databa
 MARIADB_ROOT_PASSWORD="<replace-me>" # secure password for the `root` database user
 ```
 
-Afterwards, you can deploy the stack by simply running `docker compose up -d`. This will expose Blesta on your system via HTTP on port `8080`, customizable via `BLESTA_HTTP_PORT` in the `.env` file. You can access Blesta by navigating to `http://localhost:8080` in your browser. The database information you will need to provide is going to be:
+Afterwards, you can deploy the stack by simply running `docker compose up -d`. This will expose Blesta on your system via HTTP on `127.0.0.1:8080`, with the port customizable via `BLESTA_HTTP_PORT` in the `.env` file. You can access Blesta by navigating to `http://localhost:8080` in your browser. The database information you will need to provide is going to be:
 
 - **Database Host**: `mariadb`
 - **Database Port**: `3306`
@@ -112,6 +112,7 @@ When you're done with the setup and redirected to the Blesta admin panel, you **
 - **Temp Directory** must be set to `/var/tmp/blesta/`.
 - **Uploads Directory** must be set to `/opt/blesta/data/uploads/`.
 - **Log Directory** must be set to `/opt/blesta/data/logs/`.
+- **Cache Directory** (Blesta 6 and later) must be set to `/opt/blesta/data/cache/`.
 - **My installation is behind a proxy or load balancer** should be checked if you run this container behind a reverse proxy.
 
 Confirm with the `Update Settings` button and all directories should show up with a checkmark icon, confirming they're accessible and writable. That's all, you're now ready to use Blesta!
