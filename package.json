@@ -11,8 +11,8 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@types/node": "^22.19.21",
-    "typescript": "~5.9.3",
-    "mysql2": "^3.22.5"
+    "mysql2": "^3.24.5",
+    "typescript": "~5.9.3"
   },
   "prettier": {
     "printWidth": 120,
