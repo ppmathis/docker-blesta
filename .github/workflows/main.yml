@@ -146,6 +146,8 @@ jobs:
       - name: Report unavailable licensed validation
         if: env.BLESTA_LICENSE_KEY == ''
         run: echo 'Licensed functional validation unavailable; BLESTA_LICENSE_KEY is required. Release gate will fail.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify license redaction
+        run: npm run test:reporter
       - name: Test native architecture
         id: functional
         if: env.BLESTA_LICENSE_KEY != ''

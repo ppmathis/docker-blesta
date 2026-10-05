@@ -4,7 +4,8 @@
   "scripts": {
     "test": "playwright test",
     "test:list": "playwright test --list",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "test:reporter": "node scripts/check-reporter.mjs"
   },
   "license": "MIT",
   "description": "Build and end-to-end validation for Blesta Docker images",

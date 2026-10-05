@@ -15,7 +15,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 0,
   workers: 1,
-  reporter: [['line'], ['html', { open: 'never', outputFolder: process.env.PLAYWRIGHT_REPORT_DIR ?? 'playwright-report' }]],
+  reporter: [['./tests/reporter.ts'], ['line'], ['html', { open: 'never', outputFolder: process.env.PLAYWRIGHT_REPORT_DIR ?? 'playwright-report' }]],
   use: {
     baseURL: 'http://localhost:4200',
     trace: 'off',
