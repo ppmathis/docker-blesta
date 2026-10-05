@@ -12,5 +12,9 @@ for (const target of targets) {
 }
 assert(targets.find((target) => target.args.BLESTA_VERSION === '6.0.3').tags.some((tag) => tag.endsWith(':latest')));
 execFileSync('docker', ['compose', '-f', 'compose.test.yaml', 'config', '--quiet'], { stdio: 'inherit' });
+execFileSync('docker', ['compose', '-f', 'compose.yaml', 'config', '--quiet'], {
+  stdio: 'inherit', env: { ...process.env, BLESTA_ADDRESS: '127.0.0.1', BLESTA_HOST: 'localhost',
+    MARIADB_ROOT_PASSWORD: 'validation-only', MARIADB_BLESTA_PASSWORD: 'validation-only' },
+});
 execFileSync('npx', ['tsc', '--noEmit'], { stdio: 'inherit' });
 console.log('Build matrix, Compose configuration, and TypeScript checks passed.');
