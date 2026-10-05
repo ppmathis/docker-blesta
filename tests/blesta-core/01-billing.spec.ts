@@ -80,16 +80,22 @@ test.describe('Core billing and service lifecycle', () => {
   });
 
   test('logs in and out as a client', async ({ page }) => {
-    await page.goto('/client/login/');
-    await page.locator('input[name="username"]').fill('client@example.com');
-    await page.locator('input[name="password"]').fill('Client-test-123!');
-    await page.getByRole('button', { name: 'Log In' }).click();
-    await expect(page).toHaveURL(/\/client\/$/);
-    await page.getByRole('link', { name: 'Docker Client' }).click();
-    await page.getByRole('link', { name: 'Log Out' }).click();
-    await expect(page).toHaveURL(/\/client\/login/);
-    await page.goto('/client/');
-    await expect(page.locator('input[name="password"]')).toBeVisible();
+    for (let cycle = 0; cycle < 3; cycle++) {
+      await page.goto('/client/login/');
+      await page.locator('input[name="username"]').fill('client@example.com');
+      await page.locator('input[name="password"]').fill('Client-test-123!');
+      await page.getByRole('button', { name: 'Log In' }).click();
+      await expect(page).toHaveURL(/\/client\/$/);
+      // Legacy dashboard widgets write session state. Finish them before logout.
+      await page.waitForLoadState('networkidle');
+      await page.getByRole('link', { name: 'Docker Client' }).click();
+      await page.getByRole('link', { name: 'Log Out' }).click();
+      await expect(page).toHaveURL(/\/client\/login/);
+      await page.waitForLoadState('networkidle');
+      await page.goto('/client/');
+      await expect(page).toHaveURL(/\/client\/login/);
+      await expect(page.locator('input[name="password"]')).toBeVisible();
+    }
   });
 
   test('logs out as an admin and requires authentication again', async ({ page }) => {
