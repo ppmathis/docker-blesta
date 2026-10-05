@@ -1,2 +1,3 @@
 #!/usr/bin/execlineb -P
-elglob FILE /opt/blesta/defaults/config/* cp ${FILE} /opt/blesta/data/config/
+# Never overwrite installed configuration, including the installation encryption key.
+elglob FILE /opt/blesta/defaults/config/* cp -n ${FILE} /opt/blesta/data/config/

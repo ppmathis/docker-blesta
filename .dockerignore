@@ -4,3 +4,13 @@
 /playwright/.cache/
 /test-results/
 /tests/
+/.git/
+/.env
+/.env.*
+!/.env.example
+/compose.override.yaml
+/local/
+/*.7z
+/.agents/
+/.codex/
+/.aws/
