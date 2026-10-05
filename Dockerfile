@@ -181,6 +181,7 @@ COPY --chown=0:0 --chmod=755 docker/blesta-cron /usr/local/bin/blesta-cron
 COPY --chown=0:0 --chmod=555 --from=source-vector /usr/local/bin/vector /usr/local/bin/vector
 COPY --chown=0:0 --from=source-ioncube /usr/local/src/ioncube/ioncube_loader_lin_${PHP_VERSION}.so /opt/ioncube/ioncube_loader_lin.so
 
+COPY --chown=0:0 --chmod=444 docker/health.php /opt/blesta/health.php
 COPY --chown=0:0 docker/nginx.conf /etc/nginx/nginx.conf.tpl
 COPY --chown=0:0 docker/php-custom.ini /etc/php/conf.d/99-custom.ini.tpl.in
 COPY --chown=0:0 docker/php-fpm.conf /etc/php/php-fpm.conf
@@ -208,6 +209,9 @@ ENV BLESTA_CRON_HEALTHCHECK_URL=""
 ENV BLESTA_CRON_SCHEDULE="* * * * *"
 ENV BLESTA_MEMORY_LIMIT="${BLESTA_MEMORY_LIMIT}"
 ENV BLESTA_UPLOAD_LIMIT="25M"
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -fsS --max-time 5 http://127.0.0.1:8080/healthz > /dev/null || exit 1
 
 ENTRYPOINT [ "/init" ]
 VOLUME [ "/opt/blesta/data" ]

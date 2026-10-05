@@ -1,0 +1,15 @@
+# Used only with compose.test.yaml and the isolated blesta-restore project.
+services:
+  proxy:
+    ports: !override
+      - 127.0.0.1:4210:8080
+      - 127.0.0.1:4211:8443
+  mariadb:
+    ports: !override
+      - 127.0.0.1:4212:3306
+  mailpit:
+    ports: !override
+      - 127.0.0.1:4213:8025
+  cron-monitor:
+    ports: !override
+      - 127.0.0.1:4214:8080
