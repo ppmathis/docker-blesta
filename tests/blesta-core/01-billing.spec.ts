@@ -18,7 +18,8 @@ test.describe('Core billing and service lifecycle', () => {
     client = await api(context, 'clients', 'create', { vars: {
       username: 'client@example.com', new_password: 'Client-test-123!', confirm_password: 'Client-test-123!',
       client_group_id: groups[0].id, first_name: 'Docker', last_name: 'Client', email: 'client@example.com',
-      country: 'US', settings: { default_currency: 'USD', language: 'en_us' },
+      company: 'Docker validation', address1: '123 Test Street', address2: 'Suite 1',
+      city: 'New York', state: 'NY', zip: '10001', country: 'US', settings: { default_currency: 'USD', language: 'en_us' },
     } });
     expect(Number(client.id)).toBeGreaterThan(0);
     await api(context, 'clients', 'edit', { client_id: client.id, vars: { status: 'inactive' } });
@@ -55,7 +56,7 @@ test.describe('Core billing and service lifecycle', () => {
   test('creates an invoice and applies an offline payment', async () => {
     const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
     invoiceId = await api(context, 'invoices', 'add', { vars: {
-      client_id: client.id, date_billed: date, date_due: date, status: 'active', currency: 'USD',
+      client_id: client.id, date_billed: date, date_due: date, status: 'active', currency: 'USD', note_public: 'Docker invoice validation', note_private: '',
       lines: [{ description: 'Docker invoice', qty: 1, amount: 12.50, tax: 0 }],
     } });
     let invoice = await api(context, 'invoices', 'get', { invoice_id: invoiceId });

@@ -12,7 +12,7 @@ test('completes a client checkout for a local package', async ({ playwright, pag
     const client = await api(context, 'clients', 'create', { vars: {
       username: 'checkout@example.com', new_password: 'Checkout-test-123!', confirm_password: 'Checkout-test-123!',
       client_group_id: groups[0].id, first_name: 'Checkout', last_name: 'Client', email: 'checkout@example.com',
-      address1: '123 Test Street', city: 'New York', state: 'NY', zip: '10001', country: 'US',
+      company: 'Docker validation', address1: '123 Test Street', address2: 'Suite 1', city: 'New York', state: 'NY', zip: '10001', country: 'US',
       settings: { default_currency: 'USD', language: 'en_us' },
     } });
     const modules = await api(context, 'module_manager', 'getAll', { company_id: 1 });

@@ -99,11 +99,10 @@ test.describe('Support > Departments', () => {
     const fileChooser = await fileChooserPromise;
     await fileChooser.setFiles('tests/fixtures/hello-world.txt');
 
-    // Wait for dropzone file upload to complete
+    // Legacy Dropzone retains dz-processing after success; Blesta 6 stages files until submit.
     const dzPreview = page.locator('.dz-preview').filter({ hasText: 'hello-world.txt' });
     if ((await page.locator('#ticketFileInput').count()) === 0) {
       await expect(dzPreview).toHaveClass(/dz-success/);
-      await expect(dzPreview).not.toHaveClass(/dz-processing/);
     } else {
       await expect(page.getByText('hello-world.txt', { exact: true })).toBeVisible();
       expect(await page.locator('#ticketFileInput').evaluate((input: HTMLInputElement) => input.files?.length)).toBe(1);
@@ -127,7 +126,7 @@ test.describe('Support > Departments', () => {
     await page.locator('input[name="tickets[]"][value="all"]').click();
     await page.locator('select#ticket_action').selectOption('Update Status');
     await page.locator('select[name="status"]').selectOption('Closed');
-    await page.locator('input[type="submit"]').click();
+    await page.locator('#ticket_actions input[type="submit"]').click();
     await page.goto('/admin/plugin/support_manager/admin_tickets/index/closed');
     await expect(page.getByText('Test Ticket via Mail')).toBeVisible();
   });

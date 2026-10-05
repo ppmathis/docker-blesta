@@ -37,7 +37,16 @@ export async function runComposeE2E(args: string[]): Promise<void> {
     // Inspect logs before replacement discards the previous container's diagnostics.
     await assertContainerLogs();
   }
-  await composeOutput(args);
+  try {
+    await composeOutput(args);
+  } catch (error) {
+    if (args[0] === 'up') {
+      const id = (await composeOutput(['ps', '--all', '--quiet', 'blesta'])).trim();
+      if (id) console.error(redact(await commandOutput('docker', ['inspect', '--format', '{{json .State.Health}}', id])));
+      console.error(redact(await composeOutput(['logs', '--no-color', 'blesta'])));
+    }
+    throw error;
+  }
 }
 export async function runCommand(cmd: string, args: string[]): Promise<void> {
   await commandOutput(cmd, args);
@@ -66,7 +75,7 @@ export async function waitForDatabase(): Promise<void> {
 export async function assertContainerLogs(): Promise<void> {
   const logs = await composeOutput(['logs', '--no-color', 'blesta']);
   // Access logs can contain authentication and request parameters; emit only errors.
-  const errors = logs.split('\n').filter((line) => /fatal error|uncaught|\bdeprecated\b|general\.(ERROR|CRITICAL)|E_WARNING/i.test(line));
+  const errors = logs.split('\n').filter((line) => /fatal error|uncaught|SIGSEGV|segmentation fault|Unable to load dynamic library|\bdeprecated\b|general\.(ERROR|CRITICAL)|E_WARNING/i.test(line));
   const knownUpstream = [
     /E_WARNING: Attempt to read property "value" on false .*app[\\/]models[\\/]license\.php/,
     /E_DEPRECATED: hash_hmac\(\): Passing null to parameter #2 .*Crypt[\\/]Hash\.php/,
@@ -78,9 +87,11 @@ export async function assertContainerLogs(): Promise<void> {
     knownUpstream.push(
       /E_WARNING: Attempt to read property "value" on bool .*app[\\/]models[\\/]license\.php/,
       /E_WARNING: Undefined array key "(updates|label)" .*app[\\/]app_controller\.php/,
-      /E_DEPRECATED: Creation of dynamic property TicketManager::\$(SupportManagerDepartments|Html|EmailParser|SupportManagerTickets|Settings|Blacklist) .*Lib[\\/]Loader\.php/,
+      /E_DEPRECATED: Creation of dynamic property TicketManager::\$(SupportManagerDepartments|Html|Email|Emails|Clients|EmailParser|SupportManagerTickets|Settings|Blacklist) .*Lib[\\/]Loader\.php/,
       /E_DEPRECATED: Creation of dynamic property MimeMailParser::\$parts .*MimeMailParser\.class\.php/,
       /E_WARNING: Attempt to read property "start_date" on bool .*plugins[\\/]domains[\\/]domains_plugin\.php/,
+      /E_DEPRECATED: htmlspecialchars\(\): Passing null to parameter #1 .*vendors[\\/]blesta[\\/]h2o[\\/]h2o[\\/]filters\.php/,
+      /E_DEPRECATED: strlen\(\): Passing null to parameter #1 .*vendors[\\/]tecnickcom[\\/]tcpdf[\\/]tcpdf\.php/,
     );
   }
   const unexpected = errors.filter((line) => !knownUpstream.some((signature) => signature.test(line)));
