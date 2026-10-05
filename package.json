@@ -1,21 +1,22 @@
 {
   "name": "blesta",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {},
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "mysql2": "^3.22.5"
+  "scripts": {
+    "test": "playwright test",
+    "test:list": "playwright test --list",
+    "check": "node scripts/check.mjs"
   },
+  "license": "MIT",
+  "description": "Build and end-to-end validation for Blesta Docker images",
   "devDependencies": {
     "@playwright/test": "^1.60.0",
-    "@types/node": "^22.19.21"
+    "@types/node": "^22.19.21",
+    "typescript": "~5.9.3",
+    "mysql2": "^3.22.5"
   },
   "prettier": {
     "printWidth": 120,
     "singleQuote": true
-  }
+  },
+  "private": true
 }
