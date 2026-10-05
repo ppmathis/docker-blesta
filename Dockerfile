@@ -56,6 +56,8 @@ FROM base AS source-ioncube
 ARG IONCUBE_VERSION
 ARG IONCUBE_SHA256_AMD64
 ARG IONCUBE_SHA256_ARM64
+ARG IONCUBE_FLAVOR_AMD64="lin"
+ARG PHP_VERSION
 
 USER 0:0
 RUN install -d -o 65532 -g 65532 -m 0700 /usr/local/src/ioncube
@@ -64,10 +66,11 @@ USER 65532:65532
 RUN true \
   && ARCH="$(uname -m | sed -e 's/x86_64/x86-64/;s/aarch64/aarch64/;t;d')" \
   && if [ -z "${ARCH}" ]; then echo "Unknown architecture: $(uname -m)" 2>&1 && exit 1; fi \
-  && case "${ARCH}" in x86-64) CHECKSUM="${IONCUBE_SHA256_AMD64}" ;; aarch64) CHECKSUM="${IONCUBE_SHA256_ARM64}" ;; esac \
-  && curl --retry 3 -fsSLo "/tmp/ioncube.tar.gz" "https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_${ARCH}_${IONCUBE_VERSION}.tar.gz" \
+  && case "${ARCH}" in x86-64) CHECKSUM="${IONCUBE_SHA256_AMD64}"; FLAVOR="${IONCUBE_FLAVOR_AMD64}" ;; aarch64) CHECKSUM="${IONCUBE_SHA256_ARM64}"; FLAVOR="lin" ;; esac \
+  && curl --retry 3 -fsSLo "/tmp/ioncube.tar.gz" "https://downloads.ioncube.com/loader_downloads/ioncube_loaders_${FLAVOR}_${ARCH}_${IONCUBE_VERSION}.tar.gz" \
   && echo "${CHECKSUM}  /tmp/ioncube.tar.gz" | sha256sum -c - \
   && tar -xf "/tmp/ioncube.tar.gz" -C /usr/local/src/ioncube --strip-components=1 \
+  && cp "/usr/local/src/ioncube/ioncube_loader_${FLAVOR}_${PHP_VERSION}.so" /usr/local/src/ioncube/loader.so \
   && rm -f "/tmp/ioncube.tar.gz" \
   && true
 
@@ -179,9 +182,10 @@ USER 65532:65532
 COPY --chown=0:0 --chmod=755 docker/s6-fatal /usr/local/bin/s6-fatal
 COPY --chown=0:0 --chmod=755 docker/blesta-cron /usr/local/bin/blesta-cron
 COPY --chown=0:0 --chmod=555 --from=source-vector /usr/local/bin/vector /usr/local/bin/vector
-COPY --chown=0:0 --from=source-ioncube /usr/local/src/ioncube/ioncube_loader_lin_${PHP_VERSION}.so /opt/ioncube/ioncube_loader_lin.so
+COPY --chown=0:0 --from=source-ioncube /usr/local/src/ioncube/loader.so /opt/ioncube/ioncube_loader_lin.so
 
 COPY --chown=0:0 --chmod=444 docker/health.php /opt/blesta/health.php
+RUN php -r 'require "/opt/blesta/health.php"; if (http_response_code() !== 204) { exit(1); }'
 COPY --chown=0:0 docker/nginx.conf /etc/nginx/nginx.conf.tpl
 COPY --chown=0:0 docker/php-custom.ini /etc/php/conf.d/99-custom.ini.tpl.in
 COPY --chown=0:0 docker/php-fpm.conf /etc/php/php-fpm.conf

@@ -20,6 +20,7 @@ variable "VERSIONS" {
       alpine-version = "3.22"
       php-version = "8.2"
       ioncube-version = "14.0.0"
+      ioncube-flavor-amd64 = "lin"
       ioncube-sha256-amd64 = "8d94da9e9f82386e5978ad25526ab812907fb572acc35f9555047cac0164a3ce"
       ioncube-sha256-arm64 = "c04f8b38e478fb3d2859af85b09e4079005845ba553be8657774b1e982d6e5a6"
       memory-limit = "256M"
@@ -35,6 +36,7 @@ variable "VERSIONS" {
       alpine-version = "3.22"
       php-version = "8.2"
       ioncube-version = "14.0.0"
+      ioncube-flavor-amd64 = "lin"
       ioncube-sha256-amd64 = "8d94da9e9f82386e5978ad25526ab812907fb572acc35f9555047cac0164a3ce"
       ioncube-sha256-arm64 = "c04f8b38e478fb3d2859af85b09e4079005845ba553be8657774b1e982d6e5a6"
       memory-limit = "256M"
@@ -49,9 +51,10 @@ variable "VERSIONS" {
       blesta-download-id = "323"
       alpine-version = "3.24"
       php-version = "8.3"
-      ioncube-version = "15.0.0"
-      ioncube-sha256-amd64 = "4de3d7c15a596e81abd8e605d2fcb3f70ad50a4621b877e032c178c153bc605b"
-      ioncube-sha256-arm64 = "377cf5bde36d04d2c3f9026fe4482d3e501a7990b22a468936a2f82a7b6dea87"
+      ioncube-version = "15.5.1"
+      ioncube-flavor-amd64 = "lin-musl"
+      ioncube-sha256-amd64 = "5c7d7913ceca745253d4bf99df3e7d11b16db34fca4fd6dc16feccd642ecdf8b"
+      ioncube-sha256-arm64 = "b091974aa80a76bd798d71fd5209797d93749b0be13eaff978a3dbe0106b9e1f"
       memory-limit = "512M"
       php-extra-extensions = "ldap tokenizer zlib"
       php-disable-functions = "highlight_file, show_source"
@@ -82,6 +85,7 @@ target "blesta" {
     BLESTA_VERSION = item.blesta-version
     BLESTA_SHA256 = item.blesta-sha256
     IONCUBE_VERSION = item.ioncube-version
+    IONCUBE_FLAVOR_AMD64 = item.ioncube-flavor-amd64
     IONCUBE_SHA256_AMD64 = item.ioncube-sha256-amd64
     IONCUBE_SHA256_ARM64 = item.ioncube-sha256-arm64
     PHP_EXTRA_EXTENSIONS = item.php-extra-extensions
