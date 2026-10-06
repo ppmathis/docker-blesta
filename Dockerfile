@@ -199,6 +199,10 @@ RUN true \
   < /etc/php/conf.d/99-custom.ini.tpl.in \
   > /etc/php/conf.d/99-custom.ini.tpl \
   && rm /etc/php/conf.d/99-custom.ini.tpl.in \
+  && envsubst '$BLESTA_VERSION' \
+  < /etc/s6-overlay/s6-rc.d/blesta-init/up \
+  > /etc/s6-overlay/s6-rc.d/blesta-init/up.generated \
+  && mv /etc/s6-overlay/s6-rc.d/blesta-init/up.generated /etc/s6-overlay/s6-rc.d/blesta-init/up \
   && true
 USER 65532:65532
 

@@ -1,3 +1,15 @@
 #!/usr/bin/execlineb -P
-# Never overwrite installed configuration, including the installation encryption key.
-elglob FILE /opt/blesta/defaults/config/* cp -n ${FILE} /opt/blesta/data/config/
+# The image build substitutes the version; runtime overrides cannot change policy.
+ifelse { eltest "${BLESTA_VERSION}" =~ "^5\\." }
+{
+  # Keep the v5 policy: preserve existing files, seed only missing files.
+  elglob FILE /opt/blesta/defaults/config/* cp -n ${FILE} /opt/blesta/data/config/
+}
+
+# From v6 onward, refresh versioned config and preserve installation settings.
+elglob FILES /opt/blesta/defaults/config/*
+forx -E -o 0 FILE { ${FILES} }
+ifelse { eltest ${FILE} = /opt/blesta/defaults/config/blesta.php } { exit 0 }
+backtick -E NAME { basename ${FILE} }
+if { cp ${FILE} /opt/blesta/data/config/.config.new }
+mv -f /opt/blesta/data/config/.config.new /opt/blesta/data/config/${NAME}

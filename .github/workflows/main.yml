@@ -143,6 +143,8 @@ jobs:
           const args = JSON.parse(fs.readFileSync('candidate/selected.json')).target[process.env.TARGET].args;
           fs.appendFileSync(process.env.GITHUB_ENV, `BLESTA_IMAGE=localhost:5000/blesta@${digest}\nBLESTA_EXPECTED_VERSION=${args.BLESTA_VERSION}\nBLESTA_EXPECTED_PHP=${args.PHP_VERSION}\n`);
           JS
+      - name: Verify persisted configuration bootstrap
+        run: npm run test:bootstrap
       - name: Verify license redaction
         run: npm run test:reporter
       - name: Test native architecture
