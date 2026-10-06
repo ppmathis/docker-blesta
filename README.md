@@ -128,6 +128,10 @@ Before upgrading your Blesta installation, you should consider reading the offic
 - Bump your Blesta container image tag in your Docker Compose file to the new version.
 - Head to `/admin/upgrade` in your browser and confirm the upgrade process with `Continue with Upgrade`.
 
+**Configuration handling changes in v6:** v5 images preserve all existing config files and copy only missing files, retaining the previous behavior. From v6 onward, startup preserves only your installed `config/blesta.php` (database settings and encryption keys) and refreshes every other image-provided config file, including `blesta-new.php`.
+
+When upgrading from v5 to v6, these files must match the application version; retaining the v5 `services.php` prevents v6 from loading its core classes. Any customizations to other shipped config files must be incorporated into `/opt/blesta/defaults/config/` in your derived v6 image. Database upgrades remain a separate `/admin/upgrade` operation.
+
 If you encounter any issues during the upgrade process, feel free to reach out to me on the [GitHub repository](https://github.com/ppmathis/docker-blesta/issues).
 
 ### How can I ensure that my Blesta installation is secure?

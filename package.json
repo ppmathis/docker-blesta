@@ -4,6 +4,7 @@
   "scripts": {
     "test": "playwright test",
     "test:list": "playwright test --list",
+    "test:bootstrap": "node scripts/check-bootstrap.mjs",
     "check": "node scripts/check.mjs",
     "test:reporter": "node scripts/check-reporter.mjs"
   },
