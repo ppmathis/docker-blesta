@@ -27,7 +27,7 @@ variable "VERSIONS" {
       memory-limit = "256M"
       php-extra-extensions = ""
       php-disable-functions = "highlight_file, show_source"
-      php-open-basedir = "/bin:/opt/blesta:/usr:/var/tmp/blesta:/var/tmp/php"
+      php-open-basedir = "/bin:/opt/blesta:/tmp:/usr:/var/tmp/blesta:/var/tmp/php"
       extra-tags = []
     },
     {
@@ -44,7 +44,7 @@ variable "VERSIONS" {
       memory-limit = "256M"
       php-extra-extensions = ""
       php-disable-functions = "highlight_file, show_source"
-      php-open-basedir = "/bin:/opt/blesta:/usr:/var/tmp/blesta:/var/tmp/php"
+      php-open-basedir = "/bin:/opt/blesta:/tmp:/usr:/var/tmp/blesta:/var/tmp/php"
       extra-tags = []
     },
     {
@@ -61,7 +61,7 @@ variable "VERSIONS" {
       memory-limit = "512M"
       php-extra-extensions = "ldap tokenizer zlib"
       php-disable-functions = "highlight_file, show_source"
-      php-open-basedir = "/bin:/opt/blesta:/usr:/var/tmp/blesta:/var/tmp/php"
+      php-open-basedir = "/bin:/opt/blesta:/tmp:/usr:/var/tmp/blesta:/var/tmp/php"
       extra-tags = ["latest"]
     },
   ]
