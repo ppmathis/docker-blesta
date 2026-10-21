@@ -12,6 +12,16 @@
 [![License](https://img.shields.io/github/license/ppmathis/docker-blesta?style=flat)](https://github.com/ppmathis/docker-blesta/blob/main/LICENSE.txt)
 [![CI](https://github.com/ppmathis/docker-blesta/actions/workflows/main.yml/badge.svg)](https://github.com/ppmathis/docker-blesta/actions/workflows/main.yml)
 
+> [!IMPORTANT]
+> **PHP security update (2026-10-21):** PHP 8.3.36 fixes two critical remote code execution vulnerabilities, [CVE-2026-109618](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w) and [CVE-2026-109619](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp), see the [php.net announcement](https://www.php.net/). All `-php8.3` images are built with a patched PHP.
+>
+> Alpine Linux no longer maintains PHP 8.2, so all `-php8.2` tags will not receive this fix or any further updates. Blesta 5 images are now built with PHP 8.3 and you must switch to the new tags, for example:
+>
+> - `ppmathis/blesta:5.13.10-php8.2` becomes `ppmathis/blesta:5.13.10-php8.3`
+> - `ghcr.io/ppmathis/blesta:5.12.5-php8.2` becomes `ghcr.io/ppmathis/blesta:5.12.5-php8.3`
+>
+> Please test the upgrade in a staging environment first.
+
 This is an unofficial Docker image for [Blesta](https://blesta.com/), the professional client management, billing, and support software provided by Phillips Data, Inc. This image uses the following stack for running Blesta:
 
 - [Alpine Linux](https://alpinelinux.org/), a lightweight Linux distribution
@@ -46,7 +56,7 @@ Please note that this image is not officially supported by Phillips Data, Inc. a
 
 You may pull this image either from Docker Hub via `ppmathis/blesta` or from GitHub Container Registry via `ghcr.io/ppmathis/blesta`. Both registries are automatically maintained by GitHub Actions and in sync. All images are automatically built on a daily basis to ensure freshness and security.
 
-All images are tagged like `<blesta-version>-php<php-version>`, e.g. `5.10.3-php8.2`, and use the Alpine Linux version specified in `docker-bake.hcl`. You can find a list of all tags by checking the [Docker Hub](https://hub.docker.com/r/ppmathis/blesta/tags) or [GitHub Container Registry](https://github.com/ppmathis/docker-blesta/pkgs/container/blesta) repositories. Please note that while a `latest` tag is available, you should NEVER use it in production, and pin a specific version along with manually testing upgrades in a staging environment.
+All images are tagged like `<blesta-version>-php<php-version>`, e.g. `5.13.10-php8.3`, and use the Alpine Linux version specified in `docker-bake.hcl`. You can find a list of all tags by checking the [Docker Hub](https://hub.docker.com/r/ppmathis/blesta/tags) or [GitHub Container Registry](https://github.com/ppmathis/docker-blesta/pkgs/container/blesta) repositories. Please note that while a `latest` tag is available, you should NEVER use it in production, and pin a specific version along with manually testing upgrades in a staging environment.
 
 Missing any specific tag? Feel free to open an issue on the [GitHub repository](https://github.com/ppmathis/docker-blesta/issues) and I'll add it as soon as possible.
 
