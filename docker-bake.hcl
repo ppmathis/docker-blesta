@@ -19,6 +19,7 @@ variable "VERSIONS" {
       blesta-download-id = "305"
       alpine-version = "3.24"
       php-version = "8.3"
+      php-min-version = "8.3.36"
       ioncube-version = "15.5.1"
       ioncube-flavor-amd64 = "lin-musl"
       ioncube-sha256-amd64 = "5c7d7913ceca745253d4bf99df3e7d11b16db34fca4fd6dc16feccd642ecdf8b"
@@ -35,6 +36,7 @@ variable "VERSIONS" {
       blesta-download-id = "312"
       alpine-version = "3.24"
       php-version = "8.3"
+      php-min-version = "8.3.36"
       ioncube-version = "15.5.1"
       ioncube-flavor-amd64 = "lin-musl"
       ioncube-sha256-amd64 = "5c7d7913ceca745253d4bf99df3e7d11b16db34fca4fd6dc16feccd642ecdf8b"
@@ -51,6 +53,7 @@ variable "VERSIONS" {
       blesta-download-id = "323"
       alpine-version = "3.24"
       php-version = "8.3"
+      php-min-version = "8.3.36"
       ioncube-version = "15.5.1"
       ioncube-flavor-amd64 = "lin-musl"
       ioncube-sha256-amd64 = "5c7d7913ceca745253d4bf99df3e7d11b16db34fca4fd6dc16feccd642ecdf8b"
@@ -89,6 +92,7 @@ target "blesta" {
     IONCUBE_SHA256_AMD64 = item.ioncube-sha256-amd64
     IONCUBE_SHA256_ARM64 = item.ioncube-sha256-arm64
     PHP_EXTRA_EXTENSIONS = item.php-extra-extensions
+    PHP_MIN_VERSION = item.php-min-version
     PHP_VERSION = item.php-version
   }
   annotations = [

@@ -11,6 +11,7 @@ FROM docker.io/library/alpine:${ALPINE_VERSION:-latest} AS base
 ARG ALPINE_VERSION
 ARG BLESTA_DOWNLOAD_ID
 ARG BLESTA_VERSION
+ARG PHP_MIN_VERSION
 ARG PHP_VERSION
 
 RUN true \
@@ -18,6 +19,7 @@ RUN true \
   && (test -n "${ALPINE_VERSION}" || fatal "ALPINE_VERSION is not set") \
   && (test -n "${BLESTA_DOWNLOAD_ID}" || fatal "BLESTA_DOWNLOAD_ID is not set") \
   && (test -n "${BLESTA_VERSION}" || fatal "BLESTA_VERSION is not set") \
+  && (test -n "${PHP_MIN_VERSION}" || fatal "PHP_MIN_VERSION is not set") \
   && (test -n "${PHP_VERSION}" || fatal "PHP_VERSION is not set") \
   && true
 
@@ -87,6 +89,7 @@ ARG BLESTA_MEMORY_LIMIT="256M"
 ARG BLESTA_PHP_DISABLE_FUNCTIONS="highlight_file, show_source"
 ARG BLESTA_PHP_OPEN_BASEDIR="/bin:/opt/blesta:/usr:/var/tmp/blesta:/var/tmp/php"
 ARG PHP_EXTRA_EXTENSIONS=""
+ARG PHP_MIN_VERSION
 ARG PHP_VERSION
 ARG BLESTA_VERSION
 
@@ -147,6 +150,10 @@ RUN true \
   ! -name 'conf.d' \
   -delete \
   && true
+
+# Refuse to build with an unpatched PHP.
+RUN php -r 'exit(version_compare(PHP_VERSION, getenv("PHP_MIN_VERSION"), ">=") ? 0 : 1);' \
+  || { echo "FATAL: PHP $(php -r 'echo PHP_VERSION;') is older than required ${PHP_MIN_VERSION}" 1>&2; exit 1; }
 
 USER 65532:65532
 
