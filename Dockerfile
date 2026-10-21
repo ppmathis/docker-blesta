@@ -87,7 +87,7 @@ FROM ${VECTOR_IMAGE} AS source-vector
 FROM base AS image
 ARG BLESTA_MEMORY_LIMIT="256M"
 ARG BLESTA_PHP_DISABLE_FUNCTIONS="highlight_file, show_source"
-ARG BLESTA_PHP_OPEN_BASEDIR="/bin:/opt/blesta:/usr:/var/tmp/blesta:/var/tmp/php"
+ARG BLESTA_PHP_OPEN_BASEDIR="/bin:/opt/blesta:/tmp:/usr:/var/tmp/blesta:/var/tmp/php"
 ARG PHP_EXTRA_EXTENSIONS=""
 ARG PHP_MIN_VERSION
 ARG PHP_VERSION
