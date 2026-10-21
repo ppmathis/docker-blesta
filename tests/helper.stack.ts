@@ -85,11 +85,11 @@ export async function assertContainerLogs(): Promise<void> {
   const version = process.env.BLESTA_EXPECTED_VERSION ?? process.env.BLESTA_IMAGE?.match(/:([56]\.\d+\.\d+)/)?.[1];
   if (version?.startsWith('5.')) {
     knownUpstream.push(
-      /E_WARNING: Attempt to read property "value" on bool .*app[\\/]models[\\/]license\.php/,
+      /E_WARNING: Attempt to read property "value" on (bool|false) .*app[\\/]models[\\/]license\.php/,
       /E_WARNING: Undefined array key "(updates|label)" .*app[\\/]app_controller\.php/,
       /E_DEPRECATED: Creation of dynamic property TicketManager::\$(SupportManagerDepartments|Html|Email|Emails|Clients|EmailParser|SupportManagerTickets|Settings|Blacklist) .*Lib[\\/]Loader\.php/,
       /E_DEPRECATED: Creation of dynamic property MimeMailParser::\$parts .*MimeMailParser\.class\.php/,
-      /E_WARNING: Attempt to read property "start_date" on bool .*plugins[\\/]domains[\\/]domains_plugin\.php/,
+      /E_WARNING: Attempt to read property "start_date" on (bool|false) .*plugins[\\/]domains[\\/]domains_plugin\.php/,
       /E_DEPRECATED: htmlspecialchars\(\): Passing null to parameter #1 .*vendors[\\/]blesta[\\/]h2o[\\/]h2o[\\/]filters\.php/,
       /E_DEPRECATED: strlen\(\): Passing null to parameter #1 .*vendors[\\/]tecnickcom[\\/]tcpdf[\\/]tcpdf\.php/,
     );

@@ -9,6 +9,9 @@ for (const target of targets) {
   for (const key of ['BLESTA_SHA256', 'IONCUBE_SHA256_AMD64', 'IONCUBE_SHA256_ARM64']) assert.match(target.args[key], /^[a-f0-9]{64}$/);
   for (const tag of target.tags) { assert(!allTags.has(tag), `Duplicate tag: ${tag}`); allTags.add(tag); }
   assert.equal(target.dockerfile, 'Dockerfile');
+
+  const { PHP_MIN_VERSION, PHP_VERSION } = target.args;
+  assert(PHP_MIN_VERSION.startsWith(`${PHP_VERSION}.`), `PHP_MIN_VERSION ${PHP_MIN_VERSION} does not match PHP ${PHP_VERSION}`);
 }
 assert(targets.find((target) => target.args.BLESTA_VERSION === '6.0.3').tags.some((tag) => tag.endsWith(':latest')));
 execFileSync('docker', ['compose', '-f', 'compose.test.yaml', 'config', '--quiet'], { stdio: 'inherit' });
