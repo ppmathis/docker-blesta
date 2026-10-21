@@ -48,9 +48,9 @@ variable "VERSIONS" {
       extra-tags = []
     },
     {
-      blesta-version = "6.0.3"
-      blesta-sha256 = "2d7c18d5da963396b6658a48985dbced4437f5a2427ccd25e9018c016c02b506"
-      blesta-download-id = "323"
+      blesta-version = "6.0.4"
+      blesta-sha256 = "b9b4355d8338ac94caf7e5b01457163588fea8148c721d509be03f6a757367b3"
+      blesta-download-id = "325"
       alpine-version = "3.24"
       php-version = "8.3"
       php-min-version = "8.3.36"

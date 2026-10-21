@@ -4,7 +4,7 @@ name: blesta
 services:
   blesta:
     restart: unless-stopped
-    image: ${BLESTA_IMAGE:-ppmathis/blesta:6.0.3-php8.3}
+    image: ${BLESTA_IMAGE:-ppmathis/blesta:6.0.4-php8.3}
     read_only: true
     security_opt:
       - no-new-privileges:true

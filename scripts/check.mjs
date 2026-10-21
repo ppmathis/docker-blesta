@@ -13,7 +13,7 @@ for (const target of targets) {
   const { PHP_MIN_VERSION, PHP_VERSION } = target.args;
   assert(PHP_MIN_VERSION.startsWith(`${PHP_VERSION}.`), `PHP_MIN_VERSION ${PHP_MIN_VERSION} does not match PHP ${PHP_VERSION}`);
 }
-assert(targets.find((target) => target.args.BLESTA_VERSION === '6.0.3').tags.some((tag) => tag.endsWith(':latest')));
+assert(targets.find((target) => target.args.BLESTA_VERSION === '6.0.4').tags.some((tag) => tag.endsWith(':latest')));
 execFileSync('docker', ['compose', '-f', 'compose.test.yaml', 'config', '--quiet'], { stdio: 'inherit' });
 execFileSync('docker', ['compose', '-f', 'compose.yaml', 'config', '--quiet'], {
   stdio: 'inherit', env: { ...process.env, BLESTA_ADDRESS: '127.0.0.1', BLESTA_HOST: 'localhost',
