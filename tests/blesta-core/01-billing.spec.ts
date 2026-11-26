@@ -118,7 +118,7 @@ test.describe('Core billing and service lifecycle', () => {
     // Configure the company timezone so the daily task is deterministically due.
     await api(context, 'companies', 'setSetting', { company_id: 1, key: 'timezone', value: 'UTC' });
     await api(context, 'cron_tasks', 'editTaskRun', { task_run_id: task.task_run_id, vars: { enabled: 1, time: '00:00' } });
-    await runManualCron(page);
+    await runManualCron();
     const rows = await runDatabaseQuery('SELECT i.id FROM invoices i JOIN invoice_lines l ON l.invoice_id = i.id WHERE i.client_id = ? AND l.description LIKE ?', [client.id, 'Docker recurring invoice%']);
     expect(rows).toHaveLength(1);
     expect(Number((await api(context, 'invoices', 'get', { invoice_id: rows[0].id })).total)).toBe(5);
