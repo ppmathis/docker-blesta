@@ -14,9 +14,9 @@ variable "PLATFORMS" {
 variable "VERSIONS" {
   default = [
     {
-      blesta-version = "5.12.5"
-      blesta-sha256 = "04e50937324a65e8a14527de782ef196d74c54e92fa14f1837254b6a688bf074"
-      blesta-download-id = "305"
+      blesta-version = "5.13.12"
+      blesta-sha256 = "bdd2da3c133df027a6506963a5ab97a7dff1871fb1330802f9dbcce2d43999bc"
+      blesta-download-id = "331"
       alpine-version = "3.24"
       php-version = "8.3"
       php-min-version = "8.3.36"
@@ -31,26 +31,9 @@ variable "VERSIONS" {
       extra-tags = []
     },
     {
-      blesta-version = "5.13.10"
-      blesta-sha256 = "4cb8a9d8afee7094060d3c7a51c475b40a74ef1b84d0d3ed20dbb39b01ec9a90"
-      blesta-download-id = "312"
-      alpine-version = "3.24"
-      php-version = "8.3"
-      php-min-version = "8.3.36"
-      ioncube-version = "15.5.1"
-      ioncube-flavor-amd64 = "lin-musl"
-      ioncube-sha256-amd64 = "5c7d7913ceca745253d4bf99df3e7d11b16db34fca4fd6dc16feccd642ecdf8b"
-      ioncube-sha256-arm64 = "b091974aa80a76bd798d71fd5209797d93749b0be13eaff978a3dbe0106b9e1f"
-      memory-limit = "256M"
-      php-extra-extensions = ""
-      php-disable-functions = "highlight_file, show_source"
-      php-open-basedir = "/bin:/opt/blesta:/tmp:/usr:/var/tmp/blesta:/var/tmp/php"
-      extra-tags = []
-    },
-    {
-      blesta-version = "6.0.4"
-      blesta-sha256 = "b9b4355d8338ac94caf7e5b01457163588fea8148c721d509be03f6a757367b3"
-      blesta-download-id = "325"
+      blesta-version = "6.0.5"
+      blesta-sha256 = "8a53c506f1bf1b7be401554c4d94f24046d1cbfa9b1cb1b8b5e711238ff66134"
+      blesta-download-id = "330"
       alpine-version = "3.24"
       php-version = "8.3"
       php-min-version = "8.3.36"

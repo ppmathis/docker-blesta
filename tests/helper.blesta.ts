@@ -1,5 +1,5 @@
 import { Locator, Page, expect } from '@playwright/test';
-import { runDatabaseQuery } from './helper.stack';
+import { runComposeE2E, runDatabaseQuery } from './helper.stack';
 
 export async function loginAdmin(page: Page): Promise<void> {
   await page.goto('/admin/login/');
@@ -73,14 +73,13 @@ export function getFieldsetByTitle(page: Page, title: string): Locator {
   return page.locator('section.fieldset').getByRole('heading', { name: title }).locator('..');
 }
 
-export async function runManualCron(page: Page): Promise<void> {
+export async function runManualCron(): Promise<void> {
   // Remove previous cron runs to schedule immediate execution
   await runDatabaseQuery('DELETE FROM log_cron');
 
-  // Trigger manual cron execution
-  await page.goto('/cron/?cron_key=');
+  // Run cron via CLI, since Blesta 6.0.5+ rejects web cron requests without a configured cron key
+  await runComposeE2E(['exec', '-T', 'blesta', 'php', '-q', '/opt/blesta/public/index.php', 'cron']);
 
-  // Wait for cron execution to complete
-  await page.waitForLoadState('domcontentloaded');
-  await expect(page.locator('xpath=//html/body')).toContainText('All system tasks have been completed.');
+  const runs = await runDatabaseQuery('SELECT COUNT(*) AS total FROM log_cron WHERE end_date IS NOT NULL');
+  expect(Number(runs[0].total)).toBeGreaterThan(0);
 }

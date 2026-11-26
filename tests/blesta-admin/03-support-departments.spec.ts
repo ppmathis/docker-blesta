@@ -72,7 +72,7 @@ test.describe('Support > Departments', () => {
     );
 
     // Run manual cron to fetch emails
-    await runManualCron(page);
+    await runManualCron();
     await deleteAllMails();
 
     // Ensure ticket was created
