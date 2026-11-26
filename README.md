@@ -46,7 +46,7 @@ Please note that this image is not officially supported by Phillips Data, Inc. a
 
 You may pull this image either from Docker Hub via `ppmathis/blesta` or from GitHub Container Registry via `ghcr.io/ppmathis/blesta`. Both registries are automatically maintained by GitHub Actions and in sync. All images are automatically built on a daily basis to ensure freshness and security.
 
-All images are tagged like `<blesta-version>-php<php-version>`, e.g. `5.13.10-php8.3`, and use the Alpine Linux version specified in `docker-bake.hcl`. You can find a list of all tags by checking the [Docker Hub](https://hub.docker.com/r/ppmathis/blesta/tags) or [GitHub Container Registry](https://github.com/ppmathis/docker-blesta/pkgs/container/blesta) repositories. Please note that while a `latest` tag is available, you should NEVER use it in production, and pin a specific version along with manually testing upgrades in a staging environment.
+All images are tagged like `<blesta-version>-php<php-version>`, e.g. `5.13.12-php8.3`, and use the Alpine Linux version specified in `docker-bake.hcl`. You can find a list of all tags by checking the [Docker Hub](https://hub.docker.com/r/ppmathis/blesta/tags) or [GitHub Container Registry](https://github.com/ppmathis/docker-blesta/pkgs/container/blesta) repositories. Please note that while a `latest` tag is available, you should NEVER use it in production, and pin a specific version along with manually testing upgrades in a staging environment.
 
 Missing any specific tag? Feel free to open an issue on the [GitHub repository](https://github.com/ppmathis/docker-blesta/issues) and I'll add it as soon as possible.
 
