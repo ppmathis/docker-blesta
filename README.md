@@ -12,16 +12,6 @@
 [![License](https://img.shields.io/github/license/ppmathis/docker-blesta?style=flat)](https://github.com/ppmathis/docker-blesta/blob/main/LICENSE.txt)
 [![CI](https://github.com/ppmathis/docker-blesta/actions/workflows/main.yml/badge.svg)](https://github.com/ppmathis/docker-blesta/actions/workflows/main.yml)
 
-> [!IMPORTANT]
-> **PHP security update (2026-10-21):** PHP 8.3.36 fixes two critical remote code execution vulnerabilities, [CVE-2026-109618](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w) and [CVE-2026-109619](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp), see the [php.net announcement](https://www.php.net/). All `-php8.3` images are built with a patched PHP.
->
-> Alpine Linux no longer maintains PHP 8.2, so all `-php8.2` tags will not receive this fix or any further updates. Blesta 5 images are now built with PHP 8.3 and you must switch to the new tags, for example:
->
-> - `ppmathis/blesta:5.13.10-php8.2` becomes `ppmathis/blesta:5.13.10-php8.3`
-> - `ghcr.io/ppmathis/blesta:5.12.5-php8.2` becomes `ghcr.io/ppmathis/blesta:5.12.5-php8.3`
->
-> Please test the upgrade in a staging environment first.
-
 This is an unofficial Docker image for [Blesta](https://blesta.com/), the professional client management, billing, and support software provided by Phillips Data, Inc. This image uses the following stack for running Blesta:
 
 - [Alpine Linux](https://alpinelinux.org/), a lightweight Linux distribution
