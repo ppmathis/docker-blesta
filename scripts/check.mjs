@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 const config = JSON.parse(execFileSync('docker', ['buildx', 'bake', '-f', 'docker-bake.hcl', '--print'], { encoding: 'utf8' }));
 const targets = Object.values(config.target);
-assert.equal(targets.length, 3);
+assert.equal(targets.length, 2);
 const allTags = new Set();
 for (const target of targets) {
   assert.deepEqual(target.platforms, ['linux/amd64', 'linux/arm64']);
